@@ -154,7 +154,7 @@ git commit -m "feat: create linux-notes folder structure for knowledge base"
 >
 > **Quality gates per topic (from spec §6):**
 > - All 9 sections present and substantive
-> - At least 1 Mermaid diagram + 1 ASCII diagram in Section 2
+> - At least 2 Mermaid diagrams in Section 2 (all diagrams must be Mermaid — no ASCII art)
 > - Mermaid debugging flowchart in Section 4
 > - Minimum incident count met (5 for high-weight, 3 for medium-weight)
 > - Minimum 15 interview questions across 4 categories
@@ -193,7 +193,7 @@ git commit -m "feat: create linux-notes folder structure for knowledge base"
 
 Must include:
 - §1 Concept: Linux architecture layers, kernel design philosophy, trade-offs of monolithic design
-- §2 Kernel Deep Dive: Boot sequence internals (BIOS/UEFI→bootloader→kernel→init), syscall mechanism (user→kernel transition via `syscall` instruction), key data structures. Mermaid `sequenceDiagram` for boot sequence. ASCII diagram for syscall path through kernel.
+- §2 Kernel Deep Dive: Boot sequence internals (BIOS/UEFI→bootloader→kernel→init), syscall mechanism (user→kernel transition via `syscall` instruction), key data structures. Mermaid `sequenceDiagram` for boot sequence. Mermaid `flowchart TD` for syscall path through kernel.
 - §3 Commands: `dmesg`, `journalctl -b`, `systemd-analyze`, `strace`, `uname -a`, `/proc/cmdline`, `/proc/version`
 - §4 Debugging: Boot failure triage flowchart (Mermaid `flowchart TD`). Using `systemd-analyze blame`, rescue mode, `rd.break`
 - §5 Incidents: 5 scenarios (boot loop from GRUB misconfiguration, initramfs missing driver, systemd dependency cycle, kernel panic from bad module, slow boot from disk fsck)
@@ -241,7 +241,7 @@ git commit -m "feat: add 00-fundamentals topic (boot, kernel arch, syscalls)"
 - [ ] **Step 3: Write `linux-notes/01-process-management/process-management.md`**
 
 Must include:
-- §2: Mermaid `stateDiagram-v2` for process states (Running/Sleeping/Stopped/Zombie/Dead). ASCII diagram for `task_struct` key fields.
+- §2: Mermaid `stateDiagram-v2` for process states (Running/Sleeping/Stopped/Zombie/Dead). Mermaid `classDiagram` for `task_struct` key fields.
 - §4: Mermaid `flowchart TD` for "high number of zombie processes" debugging tree
 - §5: 5 incidents (fork bomb DoS, zombie accumulation from buggy daemon, PID namespace leak in containers, SIGKILL not working on D-state process, process stuck in uninterruptible sleep)
 - Cross-references: [Fundamentals](../00-fundamentals/fundamentals.md), [CPU Scheduling](../02-cpu-scheduling/cpu-scheduling.md)
@@ -285,7 +285,7 @@ git commit -m "feat: add 01-process-management topic"
 - [ ] **Step 3: Write `linux-notes/02-cpu-scheduling/cpu-scheduling.md`**
 
 Must include:
-- §2: Mermaid `flowchart TD` for CFS scheduling decision path. ASCII diagram for run queue / red-black tree structure.
+- §2: Mermaid `flowchart TD` for CFS scheduling decision path. Mermaid `graph TD` for run queue / red-black tree structure.
 - §4: Mermaid `flowchart TD` for "high CPU / high load average" debugging decision tree
 - §5: 5 incidents (CPU starvation from RT process, noisy neighbor in cgroups, load average spike with low CPU from I/O wait, context switch storm from thread pool misconfiguration, NUMA imbalance causing latency)
 - Cross-references: [Process Management](../01-process-management/process-management.md), [Performance](../08-performance-and-debugging/performance-and-debugging.md)
@@ -331,7 +331,7 @@ git commit -m "feat: add 02-cpu-scheduling topic"
 - [ ] **Step 3: Write `linux-notes/03-memory-management/memory-management.md`**
 
 Must include:
-- §2: Mermaid `flowchart TD` for page fault handling (minor vs major). ASCII diagram for page table hierarchy (PGD→PUD→PMD→PTE). ASCII diagram for memory zones layout.
+- §2: Mermaid `flowchart TD` for page fault handling (minor vs major). Mermaid `graph TD` for page table hierarchy (PGD→PUD→PMD→PTE). Mermaid `graph LR` for memory zones layout.
 - §4: Mermaid `flowchart TD` for "OOM / high memory usage" debugging decision tree
 - §5: 5 incidents (OOM killer targeting critical service, memory leak from page cache growth, NUMA imbalance causing latency spikes, swap storm from aggressive overcommit, transparent huge pages causing latency jitter)
 - Cross-references: [Process Management](../01-process-management/process-management.md), [Kernel Internals](../07-kernel-internals/kernel-internals.md)
@@ -379,7 +379,7 @@ git commit -m "feat: add 03-memory-management topic"
 - [ ] **Step 3: Write `linux-notes/04-filesystem-and-storage/filesystem-and-storage.md`**
 
 Must include:
-- §2: Mermaid `graph LR` for VFS architecture (userspace→VFS→ext4/XFS/NFS). ASCII diagram for inode structure with direct/indirect blocks.
+- §2: Mermaid `graph LR` for VFS architecture (userspace→VFS→ext4/XFS/NFS). Mermaid `graph TD` for inode structure with direct/indirect blocks.
 - §4: Mermaid `flowchart TD` for "disk I/O bottleneck" debugging tree
 - §5: 5 incidents (inode exhaustion from small files, journal corruption after power loss, I/O scheduler causing latency for database workload, filesystem full from deleted-but-open files, ext4 extent tree corruption)
 - Cross-references: [LVM](../05-lvm/lvm.md), [Performance](../08-performance-and-debugging/performance-and-debugging.md)
@@ -423,7 +423,7 @@ git commit -m "feat: add 04-filesystem-and-storage topic"
 - [ ] **Step 3: Write `linux-notes/05-lvm/lvm.md`**
 
 Must include:
-- §2: Mermaid `graph TD` for LVM layer stack (Physical Disk → PV → VG → LV → Filesystem). ASCII diagram for PE/LE mapping.
+- §2: Mermaid `graph TD` for LVM layer stack (Physical Disk → PV → VG → LV → Filesystem). Mermaid `graph TD` for PE/LE mapping.
 - §4: Mermaid `flowchart TD` for "disk space emergency" triage
 - §5: 3 incidents + 2 composite (LV resize gone wrong, RAID degradation unnoticed, snapshot filling up root VG; composite: LVM + filesystem corruption, cloud EBS detach during I/O)
 - Cross-references: [Filesystem](../04-filesystem-and-storage/filesystem-and-storage.md)
@@ -471,7 +471,7 @@ git commit -m "feat: add 05-lvm topic"
 - [ ] **Step 3: Write `linux-notes/06-networking/networking.md`**
 
 Must include:
-- §2: Mermaid `stateDiagram-v2` for TCP state machine. Mermaid `sequenceDiagram` for DNS resolution flow. ASCII diagram for netfilter chain traversal.
+- §2: Mermaid `stateDiagram-v2` for TCP state machine. Mermaid `sequenceDiagram` for DNS resolution flow. Mermaid `flowchart LR` for netfilter chain traversal.
 - §4: Mermaid `flowchart TD` for "network latency / packet loss" debugging tree
 - §5: 5 incidents (TIME_WAIT exhaustion under load, DNS resolution timeout causing cascading failures, conntrack table overflow dropping packets, SYN flood overwhelming backlog, MTU mismatch causing silent drops)
 - Cross-references: [Fundamentals](../00-fundamentals/fundamentals.md), [Security](../09-security/security.md), [Performance](../08-performance-and-debugging/performance-and-debugging.md)
@@ -517,7 +517,7 @@ git commit -m "feat: add 06-networking topic"
 - [ ] **Step 3: Write `linux-notes/07-kernel-internals/kernel-internals.md`**
 
 Must include:
-- §2: Mermaid `graph LR` for cgroups v2 hierarchy. Mermaid `graph TD` for namespace isolation layers. ASCII diagram for kernel module loading path.
+- §2: Mermaid `graph LR` for cgroups v2 hierarchy. Mermaid `graph TD` for namespace isolation layers. Mermaid `flowchart TD` for kernel module loading path.
 - §4: Mermaid `flowchart TD` for "container resource issue" debugging tree
 - §5: 5 incidents (kernel module taint causing instability, cgroup memory limit OOM in container, PID namespace exhaustion, cgroups v1→v2 migration breaking monitoring, kernel panic from unsigned module)
 - Cross-references: [Process Management](../01-process-management/process-management.md), [Memory](../03-memory-management/memory-management.md), [Security](../09-security/security.md)
@@ -564,7 +564,7 @@ git commit -m "feat: add 07-kernel-internals topic"
 - [ ] **Step 3: Write `linux-notes/08-performance-and-debugging/performance-and-debugging.md`**
 
 Must include:
-- §2: Mermaid `graph LR` for Linux observability tool landscape (categorized by subsystem). ASCII diagram for eBPF architecture (userspace BPF program → verifier → JIT → kernel hooks).
+- §2: Mermaid `graph LR` for Linux observability tool landscape (categorized by subsystem). Mermaid `flowchart LR` for eBPF architecture (userspace BPF program → verifier → JIT → kernel hooks).
 - §4: Mermaid `flowchart TD` — THE master debugging flowchart: "My server is slow" → CPU? Memory? Disk? Network? This is the capstone diagram.
 - §5: 5 incidents (high CPU with no obvious process from short-lived forks, memory leak diagnosed with eBPF, disk latency from I/O scheduler misconfiguration, network microbursts causing packet drops, kernel soft lockup from spinlock contention)
 - Cross-references: Every prior topic — this is the capstone chapter
@@ -612,7 +612,7 @@ git commit -m "feat: add 08-performance-and-debugging topic"
 - [ ] **Step 3: Write `linux-notes/09-security/security.md`**
 
 Must include:
-- §2: Mermaid `flowchart TD` for PAM authentication flow. Mermaid `graph LR` for SELinux context decision path. ASCII diagram for Linux permission bits layout.
+- §2: Mermaid `flowchart TD` for PAM authentication flow. Mermaid `graph LR` for SELinux context decision path. Mermaid `graph LR` for Linux permission bits layout.
 - §4: Mermaid `flowchart TD` for "SELinux denying access" troubleshooting tree
 - §5: 3 incidents + 2 composite (SELinux blocking application after update, PAM misconfiguration locking out all users, SSH brute force with weak key; composite: capability escalation + container escape, audit log overflow masking intrusion)
 - Cross-references: [Fundamentals](../00-fundamentals/fundamentals.md), [Networking](../06-networking/networking.md), [Kernel Internals](../07-kernel-internals/kernel-internals.md)

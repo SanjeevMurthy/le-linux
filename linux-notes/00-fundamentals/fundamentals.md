@@ -173,51 +173,27 @@ After `switch_root`, the kernel execs `/sbin/init`, which on modern distribution
 
 The system call is the fundamental boundary crossing in Linux. Here is the exact path on x86_64:
 
-```
- User Space                          Kernel Space
-+----------------------------------+  +----------------------------------------+
-|                                  |  |                                        |
-| Application calls glibc wrapper  |  |                                        |
-| e.g., write(fd, buf, count)      |  |                                        |
-|         |                        |  |                                        |
-|         v                        |  |                                        |
-| glibc wrapper:                   |  |                                        |
-|   - Places syscall # in RAX      |  |                                        |
-|     (write = 1 on x86_64)        |  |                                        |
-|   - Args in: RDI, RSI, RDX,     |  |                                        |
-|     R10, R8, R9                  |  |                                        |
-|   - Executes SYSCALL instruction |  |                                        |
-|         |                        |  |                                        |
-|=========|========================|==|========================================|
-|         | CPU privilege switch   |  |                                        |
-|         | Ring 3 -> Ring 0       |  |                                        |
-|         | MSR_LSTAR -> entry pt  |  |                                        |
-|         +------------------------|->|  entry_SYSCALL_64 (arch/x86/entry/)    |
-|                                  |  |    - Saves user registers to pt_regs   |
-|                                  |  |    - Switches to kernel stack          |
-|                                  |  |         |                              |
-|                                  |  |         v                              |
-|                                  |  |  sys_call_table[RAX]                   |
-|                                  |  |    - Dispatch to handler               |
-|                                  |  |    - e.g., ksys_write()               |
-|                                  |  |         |                              |
-|                                  |  |         v                              |
-|                                  |  |  VFS layer -> filesystem driver        |
-|                                  |  |    - Permission checks                 |
-|                                  |  |    - Page cache interaction            |
-|                                  |  |    - Block I/O if needed               |
-|                                  |  |         |                              |
-|                                  |  |         v                              |
-|                                  |  |  Return value in RAX                   |
-|                                  |  |  SYSRET instruction                    |
-|                                  |  |    - Restores user registers           |
-|         <------------------------|--+    - Ring 0 -> Ring 3                  |
-|                                  |  |                                        |
-| glibc:                           |  |                                        |
-|   - Checks RAX for error         |  |                                        |
-|   - If negative, set errno       |  |                                        |
-|   - Return to application        |  |                                        |
-+----------------------------------+  +----------------------------------------+
+```mermaid
+flowchart TD
+    subgraph US ["User Space"]
+        A["Application calls glibc wrapper\ne.g., write(fd, buf, count)"]
+        B["glibc wrapper:\n- RAX = syscall # (write = 1 on x86_64)\n- Args in RDI, RSI, RDX, R10, R8, R9\n- Executes SYSCALL instruction"]
+        Z["glibc checks RAX:\n- If negative → set errno, return -1\n- If success → return value to application"]
+    end
+
+    subgraph KS ["Kernel Space"]
+        D["entry_SYSCALL_64 (arch/x86/entry/)\n- Saves user registers to pt_regs\n- Switches to kernel stack"]
+        E["sys_call_table[RAX]\n- Dispatch to handler\n- e.g., ksys_write()"]
+        F["VFS layer → filesystem driver\n- Permission checks\n- Page cache interaction\n- Block I/O if needed"]
+        G["Return value in RAX\nSYSRET instruction\n- Restores user registers"]
+    end
+
+    A --> B
+    B -- "CPU: Ring 3 → Ring 0\nMSR_LSTAR → entry point" --> D
+    D --> E
+    E --> F
+    F --> G
+    G -- "Ring 0 → Ring 3" --> Z
 ```
 
 #### Evolution of System Call Entry
@@ -744,69 +720,205 @@ echo 200000 > /proc/sys/dev/raid/speed_limit_max  # Throttle to 200MB/s
 
 **Q1: Explain the difference between a monolithic kernel and a microkernel. Why did Linux choose monolithic, and what are the modern mitigations for its downsides?**
 
-Linux is monolithic: kernel, drivers, filesystem code, and networking all share Ring 0 address space. This means a single bad pointer in any driver can corrupt kernel memory and panic the system. Linux mitigates this with: (1) loadable kernel modules for runtime flexibility, (2) extensive use of reference counting and RCU (Read-Copy-Update) for safe concurrent access, (3) KASAN/UBSAN sanitizers during development, (4) kernel lockdown mode restricting what even root can do to the running kernel, and (5) eBPF for safe, verified code execution in kernel context without writing actual kernel modules. The performance advantage of monolithic -- avoiding IPC overhead for every driver call -- remains decisive for Linux's primary use cases (servers, cloud, embedded).
+1. **Architecture:** Linux is monolithic -- kernel, drivers, filesystem code, and networking all share Ring 0 address space
+2. **Risk:** A single bad pointer in any driver can corrupt kernel memory and panic the system
+3. **Mitigations:**
+   - Loadable kernel modules for runtime flexibility
+   - RCU (Read-Copy-Update) for safe concurrent access
+   - KASAN/UBSAN sanitizers during development
+   - Kernel lockdown mode restricting what even root can do to the running kernel
+   - eBPF for safe, verified code execution in kernel context without writing actual kernel modules
+4. **Why monolithic wins:** The performance advantage -- avoiding IPC overhead for every driver call -- remains decisive for Linux's primary use cases (servers, cloud, embedded)
 
 **Q2: What is the vDSO and why does it exist? Name specific syscalls it accelerates.**
 
-The vDSO (virtual Dynamic Shared Object) is a kernel-provided ELF shared library automatically mapped into every process's address space. It allows certain system calls to execute entirely in user space, avoiding the ~50-100 cycle overhead of Ring 3-to-Ring 0 transitions. Key vDSO functions: `clock_gettime()`, `gettimeofday()`, `time()`, `getcpu()`. The kernel maintains shared read-only pages with current time data that the vDSO code reads directly. On a monitoring agent calling `clock_gettime()` millions of times per second, vDSO provides 10-100x improvement over real syscalls. Prior to vDSO, the `vsyscall` page existed at a fixed address, but it was a security risk (fixed address = easier ROP gadgets), so it was replaced by the ASLR-compatible vDSO.
+1. **What it is:** The vDSO (virtual Dynamic Shared Object) is a kernel-provided ELF shared library automatically mapped into every process's address space
+2. **Purpose:** Allows certain system calls to execute entirely in user space, avoiding the ~50-100 cycle overhead of Ring 3-to-Ring 0 transitions
+3. **Mechanism:** The kernel maintains shared read-only pages with current time data that the vDSO code reads directly
+4. **Accelerated functions:**
+   - `clock_gettime()` -- the most impactful
+   - `gettimeofday()` -- legacy time function
+   - `time()` -- simple epoch time
+   - `getcpu()` -- returns current CPU and NUMA node
+5. **Impact at scale:** A monitoring agent calling `clock_gettime()` millions of times per second gains 10-100x improvement over real syscalls
+6. **History:** Prior to vDSO, `vsyscall` existed at a fixed address -- a security risk (fixed address = easier ROP gadgets), replaced by ASLR-compatible vDSO
 
 **Q3: Walk through exactly what happens at the CPU level when a user-space process makes a system call on x86_64.**
 
-The process (via glibc wrapper) places the syscall number in RAX and arguments in RDI, RSI, RDX, R10, R8, R9. It executes the `syscall` instruction. The CPU: (1) saves RIP to RCX and RFLAGS to R11, (2) loads the kernel entry point from MSR_LSTAR into RIP, (3) loads the kernel segment selectors, (4) masks RFLAGS according to MSR_FMASK (disabling interrupts), (5) transitions to Ring 0. The kernel's `entry_SYSCALL_64` handler saves all user registers to a `pt_regs` structure on the kernel stack, performs the syscall dispatch via `sys_call_table[RAX]`, executes the handler, places the return value in RAX, and executes `sysret` to return to Ring 3 (restoring RIP from RCX and RFLAGS from R11).
+1. **Register setup:** The process (via glibc wrapper) places the syscall number in RAX and arguments in RDI, RSI, RDX, R10, R8, R9
+2. **SYSCALL instruction:** The CPU hardware:
+   - Saves RIP to RCX and RFLAGS to R11
+   - Loads the kernel entry point from MSR_LSTAR into RIP
+   - Loads the kernel segment selectors
+   - Masks RFLAGS according to MSR_FMASK (disabling interrupts)
+   - Transitions to Ring 0
+3. **Kernel entry:** `entry_SYSCALL_64` saves all user registers to a `pt_regs` structure on the kernel stack
+4. **Dispatch:** `sys_call_table[RAX]` dispatches to the handler (e.g., `ksys_write()`)
+5. **Return:** Handler places the return value in RAX, executes `sysret` to return to Ring 3 (restoring RIP from RCX and RFLAGS from R11)
 
 **Q4: What is the difference between the kernel's process and thread representation?**
 
-In Linux, there is no separate "thread struct." Both processes and threads are represented by `task_struct`. A thread is simply a `task_struct` that shares certain resources with other `task_struct`s. When `clone()` is called (the underlying syscall for both `fork()` and `pthread_create()`), flags determine what is shared: `CLONE_VM` shares the memory space, `CLONE_FILES` shares the file descriptor table, `CLONE_SIGHAND` shares signal handlers. A "process" is a `clone()` with no sharing flags (or `fork()`, which copies everything). A "thread" is a `clone()` with `CLONE_VM|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD`. The TGID (thread group ID) equals the PID of the main thread, which is why `getpid()` returns the same value for all threads in a process, while `gettid()` returns the unique task ID.
+1. **Unified representation:** No separate "thread struct" -- both processes and threads are `task_struct`
+2. **Sharing via `clone()` flags:** The `clone()` syscall (underlying both `fork()` and `pthread_create()`) uses flags to determine what is shared:
+   - `CLONE_VM` -- shares the memory space
+   - `CLONE_FILES` -- shares the file descriptor table
+   - `CLONE_SIGHAND` -- shares signal handlers
+   - `CLONE_THREAD` -- shares thread group ID
+3. **Process vs. thread:**
+   - **Process** = `clone()` with no sharing flags (or `fork()`, which copies everything)
+   - **Thread** = `clone()` with `CLONE_VM|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD`
+4. **TGID vs. PID:** The TGID (thread group ID) equals the PID of the main thread; `getpid()` returns the same value for all threads in a process, while `gettid()` returns the unique task ID
 
 ### Scenario-Based Questions
 
 **Q5: You perform a kernel upgrade on a production server and it won't boot. Walk through your troubleshooting approach.**
 
-First, determine *where* in the boot chain the failure occurs by checking serial console output. If you see no GRUB menu: boot from rescue media, mount the boot partition, check that `grub.cfg` references the correct kernel file and that the file exists in `/boot/`. If GRUB loads but the kernel panics: at the GRUB menu, select the previous kernel to restore service immediately. Then investigate: check `dmesg` from the previous boot (`journalctl -b -1 -p err`), look for module incompatibilities, missing initramfs drivers, or changed kernel command-line parameters. If the kernel boots but systemd hangs: add `systemd.unit=rescue.target` to the kernel command line, then inspect `systemctl --failed` and `journalctl -p err`. Always have a rollback plan: keep the previous kernel installed (GRUB auto-detects it), and set `GRUB_DEFAULT=saved` with a fallback entry.
+1. **Determine failure point** -- check serial console output to identify where in the boot chain it fails:
+   - No GRUB menu -- boot from rescue media, mount boot partition, verify `grub.cfg` references the correct kernel and that the file exists in `/boot/`
+   - Kernel panics -- select the previous kernel from the GRUB menu to restore service immediately
+   - systemd hangs -- add `systemd.unit=rescue.target` to the kernel command line, debug from shell
+2. **Investigate root cause** from the recovered system:
+   - `journalctl -b -1 -p err` -- check errors from the failed boot
+   - Look for module incompatibilities, missing initramfs drivers, or changed kernel command-line parameters
+   - `systemctl --failed` and `journalctl -p err` for systemd-level issues
+3. **Prevention:**
+   - Keep the previous kernel installed (GRUB auto-detects it)
+   - Set `GRUB_DEFAULT=saved` with a fallback entry
 
 **Q6: A fleet of 10,000 nodes is experiencing 3-minute boot times. The SLO is 45 seconds. How do you diagnose and fix this?**
 
-Collect `systemd-analyze blame` output from a representative sample of affected nodes. Look for the top offenders. Common culprits: `NetworkManager-wait-online.service` (waiting for DHCP or NIC link), `systemd-fsck` (filesystem checks on large partitions), `dev-*.device` (slow storage detection, especially with SAN/multipath). For network waits: ensure link-local addressing or switch to `systemd-networkd` with faster timeout. For fsck: tune `tune2fs -c` and `-i` intervals, or move to a filesystem with faster recovery (XFS journal replay is typically faster than ext4 for large filesystems). For device waits: check for missing multipath paths, degraded RAID arrays, or slow SAN fabric login. Use `systemd-analyze critical-chain` to find the longest *dependency chain*, not just the longest individual unit. Parallelize where possible by removing unnecessary `After=` dependencies.
+1. **Data collection:** Run `systemd-analyze blame` on a representative sample of affected nodes to identify the top offenders
+2. **Common culprits and fixes:**
+   - `NetworkManager-wait-online.service` (waiting for DHCP or NIC link) -- switch to `systemd-networkd` with faster timeout, or ensure link-local addressing
+   - `systemd-fsck` (filesystem checks on large partitions) -- tune `tune2fs -c` and `-i` intervals, or move to XFS (faster journal replay than ext4)
+   - `dev-*.device` (slow storage detection with SAN/multipath) -- check for missing multipath paths, degraded RAID arrays, or slow SAN fabric login
+3. **Dependency analysis:** Use `systemd-analyze critical-chain` to find the longest *dependency chain*, not just the longest individual unit
+4. **Optimization:** Parallelize where possible by removing unnecessary `After=` dependencies
 
 **Q7: Describe what happens from power-on to a login prompt, at the maximum level of detail you can provide.**
 
-Power button triggers the PSU's power-good signal. The CPU resets to real mode and jumps to the reset vector (`0xFFFFFFF0`), which redirects to UEFI firmware (or BIOS). Firmware performs POST (Power-On Self-Test), enumerates PCIe devices, initializes RAM via SPD/XMP, then reads the GPT (or MBR) to find the EFI System Partition. The UEFI boot manager loads the bootloader (`grubx64.efi` or `systemd-bootx64.efi`) into memory. GRUB reads `grub.cfg`, presents the menu, then loads the compressed kernel image (`vmlinuz`) and the initramfs (`initrd.img`) into memory, sets up the kernel command line, and transfers control. The kernel decompresses itself, enters `start_kernel()` in `init/main.c`, initializes the memory allocator (buddy system + SLAB/SLUB), sets up the IDT and GDT, calibrates the timer, initializes the scheduler (CFS/EEVDF), brings up secondary CPUs (SMP), and mounts the initramfs as a tmpfs root. Inside initramfs, `systemd` (or a shell script) runs `udevd` for coldplug device enumeration, loads storage drivers (NVMe, SCSI, dm-multipath), assembles LVM/RAID, locates the real root device, runs `fsck` if needed, then calls `switch_root` to pivot to the real root filesystem. PID 1 (`systemd`) re-execs itself from the real root, reads `default.target` (typically `multi-user.target` or `graphical.target`), builds the dependency tree, and activates units in parallel. Near the end of the chain, `systemd-logind` starts, `getty@tty1.service` spawns `/sbin/agetty`, which opens the TTY device, prints the login banner, and invokes `/bin/login`. PAM authenticates the user (checking `/etc/pam.d/login`, `/etc/shadow`, and optionally LDAP/SSSD), then `login` calls `setuid()`, `initgroups()`, `chdir()` to the home directory, and `execve()` the user's shell. (For detailed coverage, see [Section 2 Boot Sequence](#2-internal-working-kernel-level-deep-dive).)
+1. **Firmware phase:**
+   - Power button triggers the PSU's power-good signal
+   - CPU resets to real mode, jumps to reset vector (`0xFFFFFFF0`) which redirects to UEFI firmware (or BIOS)
+   - Firmware performs POST, enumerates PCIe devices, initializes RAM via SPD/XMP
+   - Reads GPT (or MBR) to find EFI System Partition, loads the bootloader (`grubx64.efi` or `systemd-bootx64.efi`)
+2. **Bootloader phase (GRUB):**
+   - Reads `grub.cfg`, presents the menu
+   - Loads compressed kernel image (`vmlinuz`) and initramfs (`initrd.img`) into memory
+   - Sets up kernel command line, transfers control
+3. **Kernel initialization:**
+   - Decompresses, enters `start_kernel()` in `init/main.c`
+   - Initializes memory allocator (buddy system + SLAB/SLUB), IDT and GDT, timer calibration
+   - Initializes scheduler (CFS/EEVDF), brings up secondary CPUs (SMP)
+   - Mounts initramfs as a tmpfs root
+4. **initramfs phase:**
+   - `systemd` (or shell script) runs `udevd` for coldplug device enumeration
+   - Loads storage drivers (NVMe, SCSI, dm-multipath), assembles LVM/RAID
+   - Locates the real root device, runs `fsck` if needed
+   - `switch_root` pivots to the real root filesystem
+5. **systemd (PID 1):**
+   - Re-execs itself from real root, reads `default.target` (typically `multi-user.target` or `graphical.target`)
+   - Builds dependency tree, activates units in parallel
+   - `systemd-logind` starts, `getty@tty1.service` spawns `/sbin/agetty`
+6. **Login:**
+   - `agetty` opens TTY, prints login banner, invokes `/bin/login`
+   - PAM authenticates (checking `/etc/pam.d/login`, `/etc/shadow`, optionally LDAP/SSSD)
+   - `login` calls `setuid()`, `initgroups()`, `chdir()` to home directory, `execve()` the user's shell
+
+(For detailed coverage, see [Section 2 Boot Sequence](#2-internal-working-kernel-level-deep-dive).)
 
 **Q8: A process is making millions of `gettimeofday()` calls per second and you need to optimize it. What kernel mechanisms are relevant?**
 
-The vDSO handles `gettimeofday()` without entering the kernel. Verify the application links against `linux-vdso.so.1` (check with `ldd`). If the application is statically linked or uses raw `syscall()` instead of the glibc wrapper, it bypasses vDSO and traps into the kernel each time. Fix: ensure dynamic linking or switch to `clock_gettime(CLOCK_MONOTONIC_COARSE)` for even faster (but slightly less precise) timing. Also check the clocksource: `cat /sys/devices/system/clocksource/clocksource0/current_clocksource`. TSC is fastest; if it shows `hpet` or `acpi_pm`, performance will be significantly worse. On VMs, `kvm-clock` or `tsc` should be used.
+1. **Verify vDSO usage:** The vDSO handles `gettimeofday()` without entering the kernel -- confirm the application links against `linux-vdso.so.1` (check with `ldd`)
+2. **Static linking problem:** If statically linked or using raw `syscall()`, vDSO is bypassed -- fix by ensuring dynamic linking
+3. **Clocksource check:** `cat /sys/devices/system/clocksource/clocksource0/current_clocksource`
+   - TSC -- fastest
+   - `kvm-clock` -- appropriate for VMs
+   - `hpet` or `acpi_pm` -- significantly slower, switch if possible
+4. **Precision trade-off:** Switch to `clock_gettime(CLOCK_MONOTONIC_COARSE)` for even faster (but slightly less precise) timing
 
 ### Debugging Questions
 
 **Q9: `dmesg` shows `Out of memory: Kill process 1234 (java)`. Explain the full chain of events.**
 
-The kernel's page allocator failed to find free pages even after reclaiming from page cache and inactive lists. The OOM killer was invoked (function `out_of_memory()` in `mm/oom_kill.c`). It calculates a "badness score" for each process based on RSS, oom_score_adj, and whether it holds root privileges. The Java process had the highest score (likely large heap). The kernel sends SIGKILL to the selected process. The OOM kill is logged to the kernel ring buffer. To investigate: check `cat /proc/<PID>/oom_score_adj` for score adjustment, `cat /proc/meminfo` for system memory state, and verify if memory cgroups were set (`cat /sys/fs/cgroup/memory/*/memory.limit_in_bytes`). Prevention: set `vm.overcommit_memory=2` for strict accounting, or tune oom_score_adj to protect critical processes.
+1. **Trigger:** The kernel's page allocator failed to find free pages even after reclaiming from page cache and inactive lists
+2. **OOM killer invoked:** `out_of_memory()` in `mm/oom_kill.c` calculates a "badness score" for each process based on:
+   - RSS (Resident Set Size)
+   - `oom_score_adj` (tunable per-process)
+   - Whether it holds root privileges
+3. **Selection and kill:** The Java process had the highest score (likely large heap) -- kernel sends SIGKILL, logs to ring buffer
+4. **Investigation steps:**
+   - `cat /proc/<PID>/oom_score_adj` -- check score adjustment
+   - `cat /proc/meminfo` -- system memory state
+   - `cat /sys/fs/cgroup/memory/*/memory.limit_in_bytes` -- verify if memory cgroups imposed limits
+5. **Prevention:**
+   - `vm.overcommit_memory=2` for strict accounting
+   - Tune `oom_score_adj` to protect critical processes
 
 **Q10: A node shows "hung_task_timeout_secs" errors in dmesg. What does this indicate and how do you debug it?**
 
-The kernel's hung task detector found a process in TASK_UNINTERRUPTIBLE (D-state) for longer than `kernel.hung_task_timeout_secs` (default: 120 seconds). This typically indicates a process waiting on I/O that never completes -- usually a storage issue (failed disk, NFS server unreachable, iSCSI timeout). Debug: `cat /proc/<PID>/stack` shows the kernel stack trace of the blocked process. Common blocking points: `nfs_wait_on_request`, `blk_mq_get_tag` (all I/O queues full), `mutex_lock` (kernel lock contention). Check storage health: `iostat -x 1`, `cat /proc/mdstat`, NFS server reachability.
+1. **What it means:** The kernel's hung task detector found a process in TASK_UNINTERRUPTIBLE (D-state) for longer than `kernel.hung_task_timeout_secs` (default: 120 seconds)
+2. **Typical cause:** A process waiting on I/O that never completes -- usually a storage issue (failed disk, NFS server unreachable, iSCSI timeout)
+3. **Debug steps:**
+   - `cat /proc/<PID>/stack` -- kernel stack trace of the blocked process
+   - Common blocking points: `nfs_wait_on_request`, `blk_mq_get_tag` (all I/O queues full), `mutex_lock` (kernel lock contention)
+4. **Storage health checks:**
+   - `iostat -x 1` -- I/O utilization and latency
+   - `cat /proc/mdstat` -- RAID status
+   - NFS server reachability
 
 **Q11: After a reboot, `systemd-analyze` shows userspace took 90 seconds. How do you find the bottleneck?**
 
-Run `systemd-analyze critical-chain` to find the *dependency chain* that determined the total time (not just the longest individual service). Then `systemd-analyze blame` to see all unit start times. Look for: (1) a single slow unit blocking everything (e.g., a disk mount waiting for a SAN), (2) a dependency cycle detected by `systemd-analyze verify`, (3) `Type=oneshot` units that block their dependents (these run synchronously), (4) `ExecStartPre=` commands in unit files that hang or timeout. Generate the full dependency graph with `systemd-analyze dot | dot -Tsvg -o deps.svg` and look for unexpected edges.
+1. **Find the critical path:** `systemd-analyze critical-chain` -- the *dependency chain* that determined the total time (not just the longest individual service)
+2. **List unit start times:** `systemd-analyze blame` to see all unit durations
+3. **Check for common patterns:**
+   - A single slow unit blocking everything (e.g., a disk mount waiting for a SAN)
+   - A dependency cycle detected by `systemd-analyze verify`
+   - `Type=oneshot` units that block their dependents (these run synchronously)
+   - `ExecStartPre=` commands in unit files that hang or timeout
+4. **Visualize dependencies:** `systemd-analyze dot | dot -Tsvg -o deps.svg` -- look for unexpected edges
 
 **Q12: How would you determine if a performance issue is caused by excessive system calls?**
 
-Use `strace -c -p <PID>` for a summary of syscall frequency and latency (production-safe as it uses ptrace). For lower overhead, use `perf stat -e syscalls:sys_enter_* -p <PID>` or eBPF-based `syscount-bpfcc -p <PID>`. Compare the syscall rate against expected behavior. A web server making 50,000 `epoll_wait` calls/second is normal; 50,000 `open`/`close` cycles per second suggests the application is not caching file descriptors. For deeper analysis: `perf trace -p <PID>` provides strace-like output with lower overhead using perf events rather than ptrace.
+1. **Quick assessment:** `strace -c -p <PID>` -- summary of syscall frequency and latency (uses ptrace)
+2. **Lower overhead options:**
+   - `perf stat -e syscalls:sys_enter_* -p <PID>` -- perf-based counting
+   - `syscount-bpfcc -p <PID>` -- eBPF-based, production-safe
+3. **Interpret the results:**
+   - 50,000 `epoll_wait` calls/second on a web server -- normal (event-driven I/O)
+   - 50,000 `open`/`close` cycles/second -- abnormal, application not caching file descriptors
+4. **Deeper analysis:** `perf trace -p <PID>` -- strace-like output with lower overhead using perf events rather than ptrace
 
 ### Trick Questions
 
 **Q13: Does Linux load average include processes waiting for I/O? If so, why is this different from most other Unix systems?**
 
-Yes. Linux's load average includes both TASK_RUNNING and TASK_UNINTERRUPTIBLE (D-state) processes. This is unlike Solaris, FreeBSD, and macOS, which count only runnable processes. This was a deliberate decision (1993 kernel patch) to capture I/O-bound load. The consequence: a load average of 8 on an 8-core machine does *not* necessarily mean CPU saturation -- it could mean 8 processes are blocked waiting for NFS or disk I/O. Always cross-reference load average with `%user + %system` from `mpstat` or `vmstat` to distinguish CPU load from I/O load.
+1. **Yes:** Linux load average includes both TASK_RUNNING and TASK_UNINTERRUPTIBLE (D-state) processes
+2. **Different from other Unixes:** Solaris, FreeBSD, and macOS count only runnable processes -- Linux's inclusion of D-state was a deliberate decision (1993 kernel patch) to capture I/O-bound load
+3. **Consequence:** A load average of 8 on an 8-core machine does *not* necessarily mean CPU saturation -- it could mean 8 processes are blocked waiting for NFS or disk I/O
+4. **Always cross-reference:** Use `%user + %system` from `mpstat` or `vmstat` to distinguish CPU load from I/O load
 
 **Q14: Is `init=/bin/bash` a security vulnerability?**
 
-Passing `init=/bin/bash` on the kernel command line gives you a root shell without authentication. However, this requires physical access (or IPMI/iLO/serial console access) to modify the GRUB configuration at boot time. If an attacker has physical access, you have already lost -- they could just remove the disk. Mitigations: (1) GRUB password (`grub-mkpasswd-pbkdf2`), (2) UEFI Secure Boot (prevents unsigned kernels/command-line tampering), (3) encrypted root filesystem (LUKS -- even with `init=/bin/bash`, data is inaccessible without the key), (4) measured boot with TPM (detects command-line modifications). In cloud environments, this vector is largely irrelevant because the hypervisor controls the boot chain.
+1. **What it does:** Passing `init=/bin/bash` on the kernel command line gives a root shell without authentication
+2. **Prerequisite:** Requires physical access (or IPMI/iLO/serial console) to modify GRUB configuration at boot time
+3. **Perspective:** If an attacker has physical access, you have already lost -- they could just remove the disk
+4. **Mitigations:**
+   - GRUB password (`grub-mkpasswd-pbkdf2`)
+   - UEFI Secure Boot (prevents unsigned kernels/command-line tampering)
+   - Encrypted root filesystem (LUKS -- data inaccessible without the key even with `init=/bin/bash`)
+   - Measured boot with TPM (detects command-line modifications)
+5. **Cloud context:** Largely irrelevant -- the hypervisor controls the boot chain
 
 **Q15: A server shows an uptime of 400 days. Is this good or bad?**
 
-It depends. From a stability perspective, 400 days uptime demonstrates reliability. From a security perspective, 400 days without a reboot means 400 days of unpatched kernel vulnerabilities. A 400-day uptime likely means the kernel is missing critical CVE fixes (Spectre/Meltdown mitigations, use-after-free fixes, privilege escalation patches). Modern practice: use kernel live patching (`kpatch`, `livepatch`, or vendor solutions like Canonical Livepatch or RHEL kpatch) for critical security fixes, and schedule regular reboot windows (quarterly or monthly) for kernel upgrades that cannot be live-patched. At FAANG scale, rolling reboots are automated and continuous -- no node should go more than 30-60 days without a reboot.
+1. **Stability perspective:** 400 days uptime demonstrates hardware and OS reliability
+2. **Security perspective (the real answer):** 400 days without a reboot means 400 days of unpatched kernel vulnerabilities
+   - Likely missing critical CVE fixes (Spectre/Meltdown mitigations, use-after-free fixes, privilege escalation patches)
+3. **Modern practice:**
+   - Kernel live patching (`kpatch`, `livepatch`, Canonical Livepatch, RHEL kpatch) for critical security fixes
+   - Schedule regular reboot windows (quarterly or monthly) for kernel upgrades that cannot be live-patched
+   - At FAANG scale, rolling reboots are automated and continuous -- no node should go more than 30-60 days without a reboot
 
 ---
 
@@ -904,25 +1016,25 @@ systemctl mask apt-daily.service apt-daily-upgrade.service
 
 ### Boot Sequence Quick Reference
 
-```
-Power On
-  └─> Firmware (BIOS POST / UEFI init)
-       └─> Boot device selection (MBR / ESP)
-            └─> GRUB2 loads vmlinuz + initramfs
-                 └─> Kernel: start_kernel()
-                      ├─> CPU init
-                      ├─> Memory init
-                      ├─> Device discovery
-                      └─> Mount initramfs as /
-                           └─> /init in initramfs
-                                ├─> Load storage drivers
-                                ├─> Assemble root device
-                                └─> switch_root to real rootfs
-                                     └─> systemd (PID 1)
-                                          ├─> default.target
-                                          ├─> Activate units in parallel
-                                          └─> multi-user.target / graphical.target
-                                               └─> Login prompt / SSH
+```mermaid
+flowchart TD
+    A["Power On"] --> B["Firmware\n(BIOS POST / UEFI init)"]
+    B --> C["Boot device selection\n(MBR / ESP)"]
+    C --> D["GRUB2 loads\nvmlinuz + initramfs"]
+    D --> E["Kernel: start_kernel()"]
+    E --> F["CPU init"]
+    E --> G["Memory init"]
+    E --> H["Device discovery"]
+    E --> I["Mount initramfs as /"]
+    I --> J["/init in initramfs"]
+    J --> K["Load storage drivers"]
+    J --> L["Assemble root device"]
+    J --> M["switch_root to real rootfs"]
+    M --> N["systemd (PID 1)"]
+    N --> O["default.target"]
+    N --> P["Activate units in parallel"]
+    N --> Q["multi-user.target /\ngraphical.target"]
+    Q --> R["Login prompt / SSH"]
 ```
 
 ### Key /proc and /sys Files
@@ -989,23 +1101,24 @@ dracut --force         # RHEL/Fedora
 
 ### Debugging Flowchart Summary
 
-```
-Boot problem?
-  ├─ No GRUB menu → Firmware/bootloader issue → rescue media → grub-install
-  ├─ GRUB loads, kernel panics → missing initramfs driver → dracut/update-initramfs
-  ├─ Kernel loads, systemd hangs → add systemd.unit=rescue.target → debug from shell
-  ├─ Specific service fails → systemctl status <unit> + journalctl -u <unit>
-  └─ Boot slow → systemd-analyze blame + critical-chain → disable/optimize units
+```mermaid
+flowchart TD
+    BP{"Boot problem?"}
+    BP -->|No GRUB menu| BP1["Firmware/bootloader issue\n→ rescue media → grub-install"]
+    BP -->|Kernel panics| BP2["Missing initramfs driver\n→ dracut / update-initramfs"]
+    BP -->|systemd hangs| BP3["Add systemd.unit=rescue.target\n→ debug from shell"]
+    BP -->|Service fails| BP4["systemctl status unit\n+ journalctl -u unit"]
+    BP -->|Boot slow| BP5["systemd-analyze blame\n+ critical-chain\n→ disable/optimize units"]
 
-Kernel panic?
-  ├─ Check /var/crash/ for kdump → crash utility for analysis
-  ├─ Boot previous kernel from GRUB menu
-  └─ Blacklist suspect module: modprobe.blacklist=<module>
+    KP{"Kernel panic?"}
+    KP -->|kdump available| KP1["Check /var/crash/\n→ crash utility for analysis"]
+    KP -->|Rollback| KP2["Boot previous kernel\nfrom GRUB menu"]
+    KP -->|Suspect module| KP3["Blacklist module:\nmodprobe.blacklist=module"]
 
-Process stuck in D-state?
-  ├─ cat /proc/<PID>/stack → identify blocked kernel function
-  ├─ iostat -x 1 → check I/O health
-  └─ Check NFS mounts, RAID status, SAN connectivity
+    DS{"Process stuck\nin D-state?"}
+    DS -->|Stack trace| DS1["cat /proc/PID/stack\n→ identify blocked kernel function"]
+    DS -->|I/O health| DS2["iostat -x 1\n→ check I/O health"]
+    DS -->|Storage/network| DS3["Check NFS mounts,\nRAID status, SAN connectivity"]
 ```
 
 ---

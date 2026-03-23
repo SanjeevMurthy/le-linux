@@ -188,7 +188,7 @@ Every topic file follows this structure:
 
 ### Content Depth Gates
 - Section 1: No introductory-level content. Assumes reader knows fundamentals.
-- Section 2: At least one ASCII diagram for data structure internals + one Mermaid diagram for flow
+- Section 2: At least two Mermaid diagrams (one for data structures/architecture, one for flow)
 - Section 5: Minimum 5 incidents for high-weight topics, minimum 3 for medium-weight topics (per Section 5 tiered requirement)
 - Section 6: Minimum 15 questions across 4 categories with detailed answers
 
@@ -199,8 +199,8 @@ Every topic file follows this structure:
 - Target size: 3,000-8,000 words per topic file (excluding code blocks and diagrams)
 
 ### Diagram Standards
-- **Mermaid diagrams** for flows, state machines, relationships, decision trees
-- **ASCII diagrams** for kernel data structure layouts (fixed-width rendering)
+- **Mermaid diagrams exclusively** — all diagrams must use Mermaid (no ASCII art)
+- Use ```mermaid code blocks for all diagrams
 
 | Context | Mermaid Type |
 |---------|-------------|
@@ -209,6 +209,7 @@ Every topic file follows this structure:
 | Component relationships (kernel subsystems) | `graph LR` |
 | Timelines (boot sequence, incident timeline) | `sequenceDiagram` |
 | Decision trees (debugging flowcharts) | `flowchart TD` with diamond nodes |
+| Data structures (task_struct, page tables) | `classDiagram` or `graph TD` |
 
 ---
 

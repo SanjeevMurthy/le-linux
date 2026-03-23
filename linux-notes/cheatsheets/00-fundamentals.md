@@ -5,59 +5,22 @@
 
 ---
 
-## Boot Sequence (ASCII Diagram)
+## Boot Sequence
 
-```
- POWER ON
-    │
-    ▼
- ┌──────────────────────────────────────────┐
- │  FIRMWARE (BIOS POST / UEFI Init)        │
- │  - CPU reset vector → firmware code      │
- │  - Hardware enumeration, RAM check       │
- │  - BIOS: read MBR (512 bytes)            │
- │  - UEFI: read ESP (FAT32), GPT table     │
- └──────────────┬───────────────────────────┘
-                │
-                ▼
- ┌──────────────────────────────────────────┐
- │  BOOTLOADER (GRUB2)                      │
- │  - Parse /boot/grub/grub.cfg             │
- │  - Load vmlinuz into RAM                 │
- │  - Load initramfs into RAM               │
- │  - Pass kernel command line              │
- └──────────────┬───────────────────────────┘
-                │
-                ▼
- ┌──────────────────────────────────────────┐
- │  KERNEL (start_kernel)                   │
- │  1. CPU inspection + mode setup          │
- │  2. Memory management init               │
- │  3. Scheduler init                       │
- │  4. Device bus + driver discovery         │
- │  5. Mount initramfs as temporary /       │
- │  6. Execute /init from initramfs         │
- └──────────────┬───────────────────────────┘
-                │
-                ▼
- ┌──────────────────────────────────────────┐
- │  INITRAMFS                               │
- │  - Load storage drivers (RAID/LVM/LUKS)  │
- │  - Assemble root block device            │
- │  - switch_root to real rootfs            │
- └──────────────┬───────────────────────────┘
-                │
-                ▼
- ┌──────────────────────────────────────────┐
- │  SYSTEMD (PID 1)                         │
- │  - Parse default.target                  │
- │  - Build dependency graph                │
- │  - Activate units in PARALLEL            │
- │  - Reach multi-user.target               │
- └──────────────┬───────────────────────────┘
-                │
-                ▼
-          LOGIN / SSH READY
+```mermaid
+flowchart TD
+    A["POWER ON"] --> B["FIRMWARE\n(BIOS POST / UEFI Init)"]
+    B --> |"CPU reset vector → firmware code\nHardware enumeration, RAM check\nBIOS: read MBR | UEFI: read ESP + GPT"| C["BOOTLOADER (GRUB2)"]
+    C --> |"Parse grub.cfg\nLoad vmlinuz + initramfs\nPass kernel command line"| D["KERNEL\n(start_kernel)"]
+    D --> D1["CPU inspection + mode setup"]
+    D --> D2["Memory management init"]
+    D --> D3["Scheduler init"]
+    D --> D4["Device bus + driver discovery"]
+    D --> D5["Mount initramfs as /"]
+    D5 --> E["INITRAMFS"]
+    E --> |"Load storage drivers\nAssemble root device\nswitch_root to real rootfs"| F["SYSTEMD (PID 1)"]
+    F --> |"Parse default.target\nBuild dependency graph\nActivate units in PARALLEL"| G["multi-user.target"]
+    G --> H["LOGIN / SSH READY"]
 ```
 
 ---
@@ -169,9 +132,15 @@ systemctl unmask <unit>                  # Reverse mask
 
 ## Syscall Path Quick Reference (x86_64)
 
-```
-Application → glibc wrapper → syscall instruction → Ring 0 →
-entry_SYSCALL_64 → sys_call_table[RAX] → handler → sysret → Ring 3 → glibc → app
+```mermaid
+flowchart LR
+    A["Application"] --> B["glibc wrapper"]
+    B --> |"RAX=syscall#\nRDI-R9=args"| C["SYSCALL instruction"]
+    C --> |"Ring 3 → Ring 0"| D["entry_SYSCALL_64"]
+    D --> E["sys_call_table[RAX]"]
+    E --> F["Handler"]
+    F --> |"SYSRET\nRing 0 → Ring 3"| G["glibc"]
+    G --> |"check RAX\nset errno"| H["Application"]
 ```
 
 | Register | Purpose |
@@ -276,22 +245,22 @@ quiet loglevel=3
 
 ---
 
-## Debugging Decision Tree (Text)
+## Debugging Decision Tree
 
-```
-System won't boot?
-├─ No display → Check hardware, POST beep codes, serial console
-├─ GRUB error → GRUB rescue (ls, set root, linux, initrd, boot)
-├─ Kernel panic: VFS mount → initramfs missing driver → rebuild
-├─ Kernel panic: module → Boot previous kernel, blacklist module
-├─ systemd hangs → rescue.target or emergency.target
-├─ Service fails → systemctl status + journalctl -u <unit>
-└─ Boot slow → systemd-analyze blame + critical-chain
+```mermaid
+flowchart TD
+    A{"System won't boot?"} --> B{"Where does it fail?"}
+    B --> |"No display"| C["Check hardware\nPOST beep codes\nSerial console"]
+    B --> |"GRUB error"| D["GRUB rescue\nls, set root, linux, initrd, boot"]
+    B --> |"Kernel panic:\nVFS mount"| E["initramfs missing driver\nRebuild with dracut/update-initramfs"]
+    B --> |"Kernel panic:\nmodule"| F["Boot previous kernel\nBlacklist module"]
+    B --> |"systemd hangs"| G["rescue.target or\nemergency.target"]
+    B --> |"Service fails"| H["systemctl status\njournalctl -u unit"]
+    B --> |"Boot slow"| I["systemd-analyze blame\ncritical-chain"]
 
-Kernel panic post-mortem?
-├─ kdump → crash utility on /var/crash/<timestamp>/vmcore
-├─ crash> bt (backtrace), crash> log (dmesg), crash> ps
-└─ Check modinfo vermagic matches running kernel
+    J{"Kernel panic\npost-mortem?"} --> K["kdump → crash utility\n/var/crash/timestamp/vmcore"]
+    J --> L["crash: bt, log, ps"]
+    J --> M["Check modinfo vermagic\nmatches running kernel"]
 ```
 
 ---
