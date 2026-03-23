@@ -32,6 +32,9 @@ Adapt `extract_pdfs.py` from `le-system-design/scripts/` to target the 3 Linux b
 3. Preserve tables, code blocks, and examples
 4. Generate `manifest.json` for validation
 5. Validate extraction quality (minimum content length, chapter count)
+6. Verify TOC bookmarks exist in each PDF; fall back to font-size heuristic for books without TOC
+
+**Phase 0 gate:** All 3 books must extract successfully (no redundancy margin with only 3 sources).
 
 **Book mapping:**
 
@@ -138,7 +141,8 @@ Every topic file follows this structure:
 - Mermaid diagram: debugging decision tree/flowchart
 
 ### Section 5: Real-World Production Scenarios
-- Minimum 5 FAANG-level incidents per topic
+- Minimum 5 FAANG-level incidents for high-weight topics (Process Management, Memory, Networking, Performance/Debugging)
+- Minimum 3 incidents for medium-weight topics (LVM, Security), with remaining 2 optionally as composite/cross-cutting scenarios
 - Each incident follows the template:
   - Incident Title
   - Context (scale, infra type, cloud/on-prem)
@@ -191,7 +195,8 @@ Every topic file follows this structure:
 ### Structural Gates
 - All 9 sections present and substantive
 - No book-by-book summaries — unified synthesis only
-- Cross-references between related topics
+- Cross-references between related topics using relative markdown links (e.g., `[see Process Management](../01-process-management/process-management.md)`)
+- Target size: 3,000-8,000 words per topic file (excluding code blocks and diagrams)
 
 ### Diagram Standards
 - **Mermaid diagrams** for flows, state machines, relationships, decision trees
