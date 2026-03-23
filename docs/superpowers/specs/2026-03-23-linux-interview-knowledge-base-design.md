@@ -189,7 +189,7 @@ Every topic file follows this structure:
 ### Content Depth Gates
 - Section 1: No introductory-level content. Assumes reader knows fundamentals.
 - Section 2: At least one ASCII diagram for data structure internals + one Mermaid diagram for flow
-- Section 5: Minimum 5 incidents per topic with full investigation flow
+- Section 5: Minimum 5 incidents for high-weight topics, minimum 3 for medium-weight topics (per Section 5 tiered requirement)
 - Section 6: Minimum 15 questions across 4 categories with detailed answers
 
 ### Structural Gates
