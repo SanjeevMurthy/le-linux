@@ -1,3 +1,4 @@
 sources/extracted/
 .superpowers/
 *.pdf
+*prompt*.md
