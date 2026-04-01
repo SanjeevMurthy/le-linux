@@ -94,7 +94,8 @@ This is not a software convention. It is enforced by the CPU's privilege rings (
 
 The boot process is a chain of trust and escalating capability: each stage loads the next, hands off control, and becomes irrelevant.
 
-<img width="3220" height="2246" alt="image" src="https://github.com/user-attachments/assets/c6866b1d-7657-4400-bc16-1204b891a745" />
+<img width="3268" height="2122" alt="image" src="https://github.com/user-attachments/assets/cddf1a92-7778-4c88-9502-ab22dafd84b1" />
+
 
 
 ```mermaid
