@@ -126,6 +126,9 @@ graph TB
     LB --> K8S
 ```
 
+<img width="2524" height="1642" alt="image" src="https://github.com/user-attachments/assets/406f626e-a957-452b-80b2-458053e1f1dd" />
+
+
 ---
 
 ## 2. Internal Working
