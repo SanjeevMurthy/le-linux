@@ -237,7 +237,7 @@ flowchart TD
 
     subgraph KS ["Kernel Space"]
         D["entry_SYSCALL_64 (arch/x86/entry/)<br/>- Saves user registers to pt_regs<br/>- Switches to kernel stack"]
-        E[""sys_call_table[RAX"]<br/>- Dispatch to handler<br/>- e.g., ksys_write()"]
+        E["sys_call_table[RAX]<br/>- Dispatch to handler<br/>- e.g., ksys_write()"]
         F["VFS layer → filesystem driver<br/>- Permission checks<br/>- Page cache interaction<br/>- Block I/O if needed"]
         G["Return value in RAX<br/>SYSRET instruction<br/>- Restores user registers"]
     end

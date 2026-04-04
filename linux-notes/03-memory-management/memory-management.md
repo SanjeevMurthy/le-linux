@@ -137,13 +137,13 @@ On x86_64 with 4-level page tables, a 48-bit virtual address is decomposed into 
 
 ```mermaid
 graph TD
-    VA[""Virtual Address (48 bits)<br/>Bits: [47:39"] [38:30] [29:21] [20:12] [11:0]"]
+    VA["Virtual Address (48 bits)<br/>Bits: [47:39] [38:30] [29:21] [20:12] [11:0]"]
 
-    VA --> PGD[""PGD - Page Global Directory<br/>Bits [47:39"] → 512 entries<br/>CR3 register points here<br/>One per process (mm_struct)"]
-    PGD --> PUD[""PUD - Page Upper Directory<br/>Bits [38:30"] → 512 entries<br/>Can terminate here for 1 GiB huge page"]
-    PUD --> PMD[""PMD - Page Middle Directory<br/>Bits [29:21"] → 512 entries<br/>Can terminate here for 2 MiB huge page"]
-    PMD --> PTE[""PTE - Page Table Entry<br/>Bits [20:12"] → 512 entries<br/>Contains PFN + permission bits"]
-    PTE --> PAGE[""Physical Page Frame<br/>Bits [11:0"] → 4 KiB offset within page<br/>PFN × 4096 + offset = physical address"]
+    VA --> PGD["PGD - Page Global Directory<br/>Bits [47:39] → 512 entries<br/>CR3 register points here<br/>One per process (mm_struct)"]
+    PGD --> PUD["PUD - Page Upper Directory<br/>Bits [38:30] → 512 entries<br/>Can terminate here for 1 GiB huge page"]
+    PUD --> PMD["PMD - Page Middle Directory<br/>Bits [29:21] → 512 entries<br/>Can terminate here for 2 MiB huge page"]
+    PMD --> PTE["PTE - Page Table Entry<br/>Bits [20:12] → 512 entries<br/>Contains PFN + permission bits"]
+    PTE --> PAGE["Physical Page Frame<br/>Bits [11:0] → 4 KiB offset within page<br/>PFN × 4096 + offset = physical address"]
 
     style PGD fill:#e1f5fe
     style PUD fill:#b3e5fc
