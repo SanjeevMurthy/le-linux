@@ -6,6 +6,55 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [1. Concept (Senior-Level Understanding)](#1-concept-senior-level-understanding)
+  - [Linux as the Foundation of Modern Infrastructure](#linux-as-the-foundation-of-modern-infrastructure)
+  - [SRE Reliability Framework](#sre-reliability-framework)
+  - [Infrastructure Architecture Overview](#infrastructure-architecture-overview)
+- [2. Internal Working](#2-internal-working)
+  - [2.1 Kubernetes Node Architecture: From API Call to Running Container](#21-kubernetes-node-architecture-from-api-call-to-running-container)
+  - [2.2 Compute Spectrum: Bare Metal to VMs to Containers](#22-compute-spectrum-bare-metal-to-vms-to-containers)
+  - [2.3 Configuration Drift and Convergence](#23-configuration-drift-and-convergence)
+- [3. Commands (Infrastructure Tooling)](#3-commands-infrastructure-tooling)
+  - [Kubernetes / Container Runtime](#kubernetes-container-runtime)
+  - [cgroup Management (cgroupv2)](#cgroup-management-cgroupv2)
+  - [Namespace Inspection](#namespace-inspection)
+  - [Fleet Management and Systemd](#fleet-management-and-systemd)
+- [4. Debugging (Infrastructure-Level Triage)](#4-debugging-infrastructure-level-triage)
+  - [Infrastructure Issue Triage Flowchart](#infrastructure-issue-triage-flowchart)
+  - [Fleet-Wide Debugging Toolkit](#fleet-wide-debugging-toolkit)
+  - [Correlating Across Layers](#correlating-across-layers)
+- [5. Design Scenarios](#5-design-scenarios)
+  - [Scenario 1: Design a Log Aggregation Pipeline for 50,000 Hosts](#scenario-1-design-a-log-aggregation-pipeline-for-50000-hosts)
+  - [Scenario 2: Design Auto-Scaling Infrastructure with Custom Metrics](#scenario-2-design-auto-scaling-infrastructure-with-custom-metrics)
+  - [Scenario 3: Design a Container Platform from Scratch (No Kubernetes)](#scenario-3-design-a-container-platform-from-scratch-no-kubernetes)
+  - [Scenario 4: Design Fleet-Wide Kernel Upgrade Rollout (Zero Downtime)](#scenario-4-design-fleet-wide-kernel-upgrade-rollout-zero-downtime)
+  - [Scenario 5: Design Multi-Tenant Compute Platform with Resource Isolation](#scenario-5-design-multi-tenant-compute-platform-with-resource-isolation)
+- [6. Interview Questions](#6-interview-questions)
+  - [Q1: You are designing a log pipeline for 50,000 Linux hosts. Walk through your architecture, explaining each layer's purpose and the Linux-specific decisions.](#q1-you-are-designing-a-log-pipeline-for-50000-linux-hosts-walk-through-your-architecture-explaining-each-layers-purpose-and-the-linux-specific-decisions)
+  - [Q2: Explain the Kubernetes container startup chain from `kubectl run` to a running process. What Linux primitives does each step use?](#q2-explain-the-kubernetes-container-startup-chain-from-kubectl-run-to-a-running-process-what-linux-primitives-does-each-step-use)
+  - [Q3: Compare bare metal, VMs, and containers. When would you recommend each for production workloads?](#q3-compare-bare-metal-vms-and-containers-when-would-you-recommend-each-for-production-workloads)
+  - [Q4: How do cgroups v2 provide multi-tenant resource isolation? Explain the specific controllers and their semantics.](#q4-how-do-cgroups-v2-provide-multi-tenant-resource-isolation-explain-the-specific-controllers-and-their-semantics)
+  - [Q5: Describe how you would design a fleet-wide kernel upgrade process for 50,000 hosts with zero user-facing downtime.](#q5-describe-how-you-would-design-a-fleet-wide-kernel-upgrade-process-for-50000-hosts-with-zero-user-facing-downtime)
+  - [Q6: What is the difference between `memory.min`, `memory.low`, `memory.high`, and `memory.max` in cgroups v2? Design a configuration for a production service.](#q6-what-is-the-difference-between-memorymin-memorylow-memoryhigh-and-memorymax-in-cgroups-v2-design-a-configuration-for-a-production-service)
+  - [Q7: How would you detect and remediate configuration drift across a fleet of 10,000 Linux hosts?](#q7-how-would-you-detect-and-remediate-configuration-drift-across-a-fleet-of-10000-linux-hosts)
+  - [Q8: Design the networking layer for a container platform. How do you provide cross-host container connectivity?](#q8-design-the-networking-layer-for-a-container-platform-how-do-you-provide-cross-host-container-connectivity)
+  - [Q9: What is an error budget and how does it drive infrastructure decisions?](#q9-what-is-an-error-budget-and-how-does-it-drive-infrastructure-decisions)
+  - [Q10: Explain PSI (Pressure Stall Information) and how you would use it for fleet-wide capacity planning.](#q10-explain-psi-pressure-stall-information-and-how-you-would-use-it-for-fleet-wide-capacity-planning)
+  - [Q11: How would you build a container from scratch using only Linux syscalls?](#q11-how-would-you-build-a-container-from-scratch-using-only-linux-syscalls)
+  - [Q12: You observe intermittent OOM kills on Kubernetes nodes. How do you investigate and resolve this?](#q12-you-observe-intermittent-oom-kills-on-kubernetes-nodes-how-do-you-investigate-and-resolve-this)
+  - [Q13: How does Linux overlayfs work and why is it critical for containers?](#q13-how-does-linux-overlayfs-work-and-why-is-it-critical-for-containers)
+  - [Q14: Describe immutable infrastructure and its Linux implementation.](#q14-describe-immutable-infrastructure-and-its-linux-implementation)
+  - [Q15: Design capacity planning for a platform serving 200 teams on shared infrastructure.](#q15-design-capacity-planning-for-a-platform-serving-200-teams-on-shared-infrastructure)
+  - [Q16: Security implications of shared kernel in containers. How do you mitigate?](#q16-security-implications-of-shared-kernel-in-containers-how-do-you-mitigate)
+- [7. Gotchas and Pitfalls](#7-gotchas-and-pitfalls)
+- [8. Pro Tips (Staff+ Level)](#8-pro-tips-staff-level)
+- [9. Quick Reference / Cheatsheet](#9-quick-reference-cheatsheet)
+
+<!-- toc stop -->
+
 ## 1. Concept (Senior-Level Understanding)
 
 ### Linux as the Foundation of Modern Infrastructure

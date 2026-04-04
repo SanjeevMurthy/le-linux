@@ -6,6 +6,36 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [Scheduler Architecture at a Glance](#scheduler-architecture-at-a-glance)
+- [Scheduling Policy Comparison](#scheduling-policy-comparison)
+- [Nice Value to Weight Mapping (Key Values)](#nice-value-to-weight-mapping-key-values)
+- [CFS vs EEVDF Quick Comparison](#cfs-vs-eevdf-quick-comparison)
+- [Essential Commands](#essential-commands)
+  - [View & Set Scheduling Policy](#view-set-scheduling-policy)
+  - [Nice & Renice](#nice-renice)
+  - [CPU Affinity & NUMA](#cpu-affinity-numa)
+  - [Monitoring](#monitoring)
+  - [Process-Level Scheduler Info](#process-level-scheduler-info)
+  - [perf sched (Advanced)](#perf-sched-advanced)
+- [cgroups v2 CPU Controller](#cgroups-v2-cpu-controller)
+  - [Setup](#setup)
+  - [Weight (Proportional Share)](#weight-proportional-share)
+  - [Bandwidth Limit (Hard Cap)](#bandwidth-limit-hard-cap)
+  - [CPU Pinning via cgroups](#cpu-pinning-via-cgroups)
+  - [Monitoring](#monitoring)
+  - [Systemd Equivalents](#systemd-equivalents)
+- [Load Average Interpretation Guide](#load-average-interpretation-guide)
+  - [Quick Rules](#quick-rules)
+- [Context Switching Reference](#context-switching-reference)
+- [RT Throttling Safety Net](#rt-throttling-safety-net)
+- [Key /proc and /sys Paths](#key-proc-and-sys-paths)
+- [Interview One-Liners](#interview-one-liners)
+
+<!-- toc stop -->
+
 ## Scheduler Architecture at a Glance
 
 ```mermaid

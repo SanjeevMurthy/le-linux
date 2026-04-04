@@ -6,6 +6,20 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [Topic Index](#topic-index)
+- [Quick Links](#quick-links)
+- [Study Paths](#study-paths)
+  - [1-Week Crash Course (Highest Interview Weight)](#1-week-crash-course-highest-interview-weight)
+  - [2-Week Deep Dive (All Core Topics)](#2-week-deep-dive-all-core-topics)
+  - [4-Week Comprehensive (Full Preparation)](#4-week-comprehensive-full-preparation)
+- [Topic Template (9-Section Structure)](#topic-template-9-section-structure)
+- [How to Use This Repository](#how-to-use-this-repository)
+
+<!-- toc stop -->
+
 ## Topic Index
 
 | # | Topic | Notes | Interview Qs | Cheatsheet |

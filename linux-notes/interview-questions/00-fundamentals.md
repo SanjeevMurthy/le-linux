@@ -6,6 +6,35 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [How to Use This File](#how-to-use-this-file)
+- [Category 1: Conceptual Deep Questions](#category-1-conceptual-deep-questions)
+  - [Q1. Explain the difference between a monolithic kernel and a microkernel. Why did Linux choose monolithic, and what are the modern mitigations for its downsides?](#q1-explain-the-difference-between-a-monolithic-kernel-and-a-microkernel-why-did-linux-choose-monolithic-and-what-are-the-modern-mitigations-for-its-downsides)
+  - [Q2. What is the vDSO and why does it exist? Name the specific syscalls it accelerates and explain the mechanism.](#q2-what-is-the-vdso-and-why-does-it-exist-name-the-specific-syscalls-it-accelerates-and-explain-the-mechanism)
+  - [Q3. Walk through exactly what happens at the CPU level when a user-space process makes a system call on x86_64.](#q3-walk-through-exactly-what-happens-at-the-cpu-level-when-a-user-space-process-makes-a-system-call-on-x86_64)
+  - [Q4. What is the difference between the kernel's process and thread representation? How does clone() unify them?](#q4-what-is-the-difference-between-the-kernels-process-and-thread-representation-how-does-clone-unify-them)
+  - [Q5. Explain the role of the Memory Management Unit (MMU) and page tables in the context of process isolation.](#q5-explain-the-role-of-the-memory-management-unit-mmu-and-page-tables-in-the-context-of-process-isolation)
+- [Category 2: Scenario-Based Questions](#category-2-scenario-based-questions)
+  - [Q6. You perform a kernel upgrade on a production server and it won't boot. Walk through your troubleshooting approach.](#q6-you-perform-a-kernel-upgrade-on-a-production-server-and-it-wont-boot-walk-through-your-troubleshooting-approach)
+  - [Q7. A fleet of 10,000 nodes is experiencing 3-minute boot times. Your SLO is 45 seconds. How do you diagnose and fix this?](#q7-a-fleet-of-10000-nodes-is-experiencing-3-minute-boot-times-your-slo-is-45-seconds-how-do-you-diagnose-and-fix-this)
+  - [Q8. Describe what happens from power-on to a login prompt at the maximum level of detail.](#q8-describe-what-happens-from-power-on-to-a-login-prompt-at-the-maximum-level-of-detail)
+  - [Q9. A process is making millions of gettimeofday() calls per second and you need to optimize it. What kernel mechanisms are relevant?](#q9-a-process-is-making-millions-of-gettimeofday-calls-per-second-and-you-need-to-optimize-it-what-kernel-mechanisms-are-relevant)
+- [Category 3: Debugging Questions](#category-3-debugging-questions)
+  - [Q10. `dmesg` shows "Out of memory: Kill process 1234 (java)". Explain the full chain of events and how you investigate.](#q10-dmesg-shows-out-of-memory-kill-process-1234-java-explain-the-full-chain-of-events-and-how-you-investigate)
+  - [Q11. A node shows "hung_task_timeout_secs" warnings in dmesg. What does this indicate and how do you debug it?](#q11-a-node-shows-hung_task_timeout_secs-warnings-in-dmesg-what-does-this-indicate-and-how-do-you-debug-it)
+  - [Q12. After a reboot, `systemd-analyze` shows userspace took 90 seconds. Your normal baseline is 15 seconds. How do you find the bottleneck?](#q12-after-a-reboot-systemd-analyze-shows-userspace-took-90-seconds-your-normal-baseline-is-15-seconds-how-do-you-find-the-bottleneck)
+  - [Q13. How would you determine if a performance issue is caused by excessive system calls?](#q13-how-would-you-determine-if-a-performance-issue-is-caused-by-excessive-system-calls)
+- [Category 4: Trick Questions](#category-4-trick-questions)
+  - [Q14. Does Linux load average include processes waiting for I/O? How is this different from other Unix systems?](#q14-does-linux-load-average-include-processes-waiting-for-io-how-is-this-different-from-other-unix-systems)
+  - [Q15. Is `init=/bin/bash` a security vulnerability?](#q15-is-initbinbash-a-security-vulnerability)
+  - [Q16. A server shows uptime of 400 days. Is this good or bad?](#q16-a-server-shows-uptime-of-400-days-is-this-good-or-bad)
+  - [Q17. What is the difference between `TASK_INTERRUPTIBLE` and `TASK_UNINTERRUPTIBLE` sleep states? Why does it matter for the OOM killer?](#q17-what-is-the-difference-between-task_interruptible-and-task_uninterruptible-sleep-states-why-does-it-matter-for-the-oom-killer)
+  - [Q18. Explain the purpose of initramfs. Why can't the kernel mount the root filesystem directly?](#q18-explain-the-purpose-of-initramfs-why-cant-the-kernel-mount-the-root-filesystem-directly)
+
+<!-- toc stop -->
+
 ## How to Use This File
 
 - Questions are organized by category and tagged with difficulty level

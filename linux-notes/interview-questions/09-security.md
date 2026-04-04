@@ -5,6 +5,30 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [Q1: Explain DAC vs. MAC in Linux. When would you choose to deploy SELinux over standard permissions?](#q1-explain-dac-vs-mac-in-linux-when-would-you-choose-to-deploy-selinux-over-standard-permissions)
+- [Q2: Walk through the SELinux troubleshooting process when a service is denied access.](#q2-walk-through-the-selinux-troubleshooting-process-when-a-service-is-denied-access)
+- [Q3: Describe the PAM architecture. How would you implement MFA for SSH without breaking console access?](#q3-describe-the-pam-architecture-how-would-you-implement-mfa-for-ssh-without-breaking-console-access)
+- [Q4: What are Linux capabilities? Why is CAP_SYS_ADMIN called "the new root"?](#q4-what-are-linux-capabilities-why-is-cap_sys_admin-called-the-new-root)
+- [Q5: How does seccomp-bpf work? How do container runtimes use it?](#q5-how-does-seccomp-bpf-work-how-do-container-runtimes-use-it)
+- [Q6: Explain the Linux audit framework. How would you configure it for SOC2/PCI compliance?](#q6-explain-the-linux-audit-framework-how-would-you-configure-it-for-soc2pci-compliance)
+- [Q7: How would you harden an SSH server for a production bastion host?](#q7-how-would-you-harden-an-ssh-server-for-a-production-bastion-host)
+- [Q8: What is the difference between iptables and nftables? Why is the industry moving to nftables?](#q8-what-is-the-difference-between-iptables-and-nftables-why-is-the-industry-moving-to-nftables)
+- [Q9: How do user namespaces interact with Linux capabilities and security?](#q9-how-do-user-namespaces-interact-with-linux-capabilities-and-security)
+- [Q10: Describe SUID/SGID security implications and how capabilities replace them.](#q10-describe-suidsgid-security-implications-and-how-capabilities-replace-them)
+- [Q11: How does Fail2Ban work? What are its limitations at scale?](#q11-how-does-fail2ban-work-what-are-its-limitations-at-scale)
+- [Q12: Explain CIS Benchmarks for Linux. How would you automate compliance?](#q12-explain-cis-benchmarks-for-linux-how-would-you-automate-compliance)
+- [Q13: How would you investigate a suspected privilege escalation?](#q13-how-would-you-investigate-a-suspected-privilege-escalation)
+- [Q14: What is the relationship between namespaces, cgroups, capabilities, and seccomp in container security?](#q14-what-is-the-relationship-between-namespaces-cgroups-capabilities-and-seccomp-in-container-security)
+- [Q15: How would you design zero-trust SSH access for a large fleet?](#q15-how-would-you-design-zero-trust-ssh-access-for-a-large-fleet)
+- [Q16: Explain immutable audit rules and why they matter for security.](#q16-explain-immutable-audit-rules-and-why-they-matter-for-security)
+- [Q17: A container needs to run a process that binds to port 443. How do you do this securely?](#q17-a-container-needs-to-run-a-process-that-binds-to-port-443-how-do-you-do-this-securely)
+- [Q18: How do SELinux booleans work? Give examples of commonly used booleans.](#q18-how-do-selinux-booleans-work-give-examples-of-commonly-used-booleans)
+
+<!-- toc stop -->
+
 ## Q1: Explain DAC vs. MAC in Linux. When would you choose to deploy SELinux over standard permissions?
 
 - **DAC (Discretionary Access Control):**

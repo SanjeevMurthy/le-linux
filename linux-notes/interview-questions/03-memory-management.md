@@ -6,6 +6,38 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [How to Use This File](#how-to-use-this-file)
+- [Category 1: Conceptual Deep Questions](#category-1-conceptual-deep-questions)
+  - [Q1. Explain the difference between page cache and buffer cache. Are they the same thing in modern Linux?](#q1-explain-the-difference-between-page-cache-and-buffer-cache-are-they-the-same-thing-in-modern-linux)
+  - [Q2. What happens when a process calls malloc(1 GiB) on a system with only 512 MiB of free RAM? Walk through each step.](#q2-what-happens-when-a-process-calls-malloc1-gib-on-a-system-with-only-512-mib-of-free-ram-walk-through-each-step)
+  - [Q3. Explain the relationship between RSS, VSZ, PSS, and USS. Which metric should you use for capacity planning?](#q3-explain-the-relationship-between-rss-vsz-pss-and-uss-which-metric-should-you-use-for-capacity-planning)
+  - [Q4. How does Copy-on-Write work at the page table level during fork()? Why is this important for Redis and PostgreSQL?](#q4-how-does-copy-on-write-work-at-the-page-table-level-during-fork-why-is-this-important-for-redis-and-postgresql)
+  - [Q5. Describe the x86_64 page table hierarchy. What are 5-level page tables and why were they added?](#q5-describe-the-x86_64-page-table-hierarchy-what-are-5-level-page-tables-and-why-were-they-added)
+- [Category 2: Scenario-Based Questions](#category-2-scenario-based-questions)
+  - [Q6. A production server shows 0% free memory in monitoring but no alerts from the application. The SRE team wants to add more RAM. How do you assess the situation?](#q6-a-production-server-shows-0-free-memory-in-monitoring-but-no-alerts-from-the-application-the-sre-team-wants-to-add-more-ram-how-do-you-assess-the-situation)
+  - [Q7. You SSH into a server and it takes 45 seconds to get a shell. Once logged in, commands are slow. What is your memory-related debugging approach?](#q7-you-ssh-into-a-server-and-it-takes-45-seconds-to-get-a-shell-once-logged-in-commands-are-slow-what-is-your-memory-related-debugging-approach)
+  - [Q8. A container running with memory.max=4G is being OOM-killed, but the application inside reports using only 2 GiB of heap. What is consuming the other 2 GiB?](#q8-a-container-running-with-memorymax4g-is-being-oom-killed-but-the-application-inside-reports-using-only-2-gib-of-heap-what-is-consuming-the-other-2-gib)
+  - [Q9. Your team runs a service on NUMA-aware hardware. After a kernel upgrade, P99 latency doubles. Memory usage and CPU usage appear unchanged. Where do you look?](#q9-your-team-runs-a-service-on-numa-aware-hardware-after-a-kernel-upgrade-p99-latency-doubles-memory-usage-and-cpu-usage-appear-unchanged-where-do-you-look)
+- [Category 3: Debugging Questions](#category-3-debugging-questions)
+  - [Q10. How do you determine whether a system is experiencing memory pressure vs. healthy page cache usage?](#q10-how-do-you-determine-whether-a-system-is-experiencing-memory-pressure-vs-healthy-page-cache-usage)
+  - [Q11. A process is consuming 50 GiB of RSS but you cannot find the memory in its heap or mapped files. How do you investigate?](#q11-a-process-is-consuming-50-gib-of-rss-but-you-cannot-find-the-memory-in-its-heap-or-mapped-files-how-do-you-investigate)
+  - [Q12. How do you investigate a suspected kernel slab memory leak?](#q12-how-do-you-investigate-a-suspected-kernel-slab-memory-leak)
+  - [Q13. Explain how to use /proc/buddyinfo and /proc/pagetypeinfo to diagnose memory fragmentation.](#q13-explain-how-to-use-procbuddyinfo-and-procpagetypeinfo-to-diagnose-memory-fragmentation)
+- [Category 4: Trick Questions](#category-4-trick-questions)
+  - [Q14. Is it possible for a Linux system to run out of memory even when /proc/meminfo shows significant MemFree?](#q14-is-it-possible-for-a-linux-system-to-run-out-of-memory-even-when-procmeminfo-shows-significant-memfree)
+  - [Q15. A process has 20 GiB VSZ and 50 MiB RSS. Is this process consuming excessive memory?](#q15-a-process-has-20-gib-vsz-and-50-mib-rss-is-this-process-consuming-excessive-memory)
+  - [Q16. If you set vm.swappiness=0, does Linux never swap?](#q16-if-you-set-vmswappiness0-does-linux-never-swap)
+  - [Q17. Does adding more swap space prevent OOM kills?](#q17-does-adding-more-swap-space-prevent-oom-kills)
+- [Bonus Questions](#bonus-questions)
+  - [Q18. What is the difference between minor and major page faults, and how do you measure each for a running process?](#q18-what-is-the-difference-between-minor-and-major-page-faults-and-how-do-you-measure-each-for-a-running-process)
+  - [Q19. Explain how memory cgroups v2 work. What is the difference between memory.max, memory.high, memory.low, and memory.min?](#q19-explain-how-memory-cgroups-v2-work-what-is-the-difference-between-memorymax-memoryhigh-memorylow-and-memorymin)
+  - [Q20. What is the relationship between ZONE_DMA, ZONE_DMA32, and ZONE_NORMAL on x86_64? Can a process force allocation from a specific zone?](#q20-what-is-the-relationship-between-zone_dma-zone_dma32-and-zone_normal-on-x86_64-can-a-process-force-allocation-from-a-specific-zone)
+
+<!-- toc stop -->
+
 ## How to Use This File
 
 - Questions are organized by category and tagged with difficulty level

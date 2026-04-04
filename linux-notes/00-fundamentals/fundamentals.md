@@ -6,6 +6,56 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [1. Concept (Senior-Level Understanding)](#1-concept-senior-level-understanding)
+  - [Linux Architecture: The Three-Layer Model](#linux-architecture-the-three-layer-model)
+  - [Why Linux Chose Monolithic (And Why It Matters)](#why-linux-chose-monolithic-and-why-it-matters)
+  - [The Kernel as Hardware Abstraction Layer](#the-kernel-as-hardware-abstraction-layer)
+  - [Kernel Mode vs. User Mode: The Hardware Enforcement](#kernel-mode-vs-user-mode-the-hardware-enforcement)
+- [2. Internal Working (Kernel-Level Deep Dive)](#2-internal-working-kernel-level-deep-dive)
+  - [Boot Sequence Internals](#boot-sequence-internals)
+  - [System Call Mechanism: User-Space to Kernel Transition](#system-call-mechanism-user-space-to-kernel-transition)
+  - [Key Kernel Data Structures](#key-kernel-data-structures)
+- [3. Commands + Practical Examples](#3-commands-practical-examples)
+  - [Boot Analysis](#boot-analysis)
+  - [Kernel & System Information](#kernel-system-information)
+  - [System Call Tracing](#system-call-tracing)
+  - [Interrupt and Kernel Stats](#interrupt-and-kernel-stats)
+- [4. Advanced Debugging & Observability](#4-advanced-debugging-observability)
+  - [Boot Failure Debugging Decision Tree](#boot-failure-debugging-decision-tree)
+  - [Boot Failure Triage Procedures](#boot-failure-triage-procedures)
+  - [Kernel Crash Debugging](#kernel-crash-debugging)
+- [5. Real-World Production Scenarios](#5-real-world-production-scenarios)
+  - [Incident 1: Boot Loop from GRUB Misconfiguration After Kernel Upgrade](#incident-1-boot-loop-from-grub-misconfiguration-after-kernel-upgrade)
+  - [Incident 2: initramfs Missing Storage Driver After Hardware Migration](#incident-2-initramfs-missing-storage-driver-after-hardware-migration)
+  - [Incident 3: systemd Dependency Cycle Causing Delayed Boot on 10,000-Node Fleet](#incident-3-systemd-dependency-cycle-causing-delayed-boot-on-10000-node-fleet)
+  - [Incident 4: Kernel Panic from Incompatible Module Loaded at Boot](#incident-4-kernel-panic-from-incompatible-module-loaded-at-boot)
+  - [Incident 5: Slow Boot (5+ Minutes) from Filesystem Check on Degraded RAID](#incident-5-slow-boot-5-minutes-from-filesystem-check-on-degraded-raid)
+- [6. Advanced Interview Questions](#6-advanced-interview-questions)
+  - [Conceptual Deep Questions](#conceptual-deep-questions)
+  - [Scenario-Based Questions](#scenario-based-questions)
+  - [Debugging Questions](#debugging-questions)
+  - [Trick Questions](#trick-questions)
+- [7. Common Pitfalls & Misconceptions](#7-common-pitfalls-misconceptions)
+  - ["Load average directly maps to CPU utilization"](#load-average-directly-maps-to-cpu-utilization)
+  - ["init=/bin/bash bypasses all security"](#initbinbash-bypasses-all-security)
+  - ["systemd targets are just renamed runlevels"](#systemd-targets-are-just-renamed-runlevels)
+  - ["The kernel ring buffer preserves all boot messages"](#the-kernel-ring-buffer-preserves-all-boot-messages)
+  - ["Rebooting is always the fastest fix for boot-related issues"](#rebooting-is-always-the-fastest-fix-for-boot-related-issues)
+- [8. Pro Tips (From 15+ Years Experience)](#8-pro-tips-from-15-years-experience)
+  - [Kernel Command-Line Tuning for Production](#kernel-command-line-tuning-for-production)
+  - [systemd Optimization for Fast Boot](#systemd-optimization-for-fast-boot)
+  - [Boot Resilience Strategies](#boot-resilience-strategies)
+- [9. Cheatsheet](#9-cheatsheet)
+  - [Boot Sequence Quick Reference](#boot-sequence-quick-reference)
+  - [Key /proc and /sys Files](#key-proc-and-sys-files)
+  - [Essential One-Liners](#essential-one-liners)
+  - [Debugging Flowchart Summary](#debugging-flowchart-summary)
+
+<!-- toc stop -->
+
 ## 1. Concept (Senior-Level Understanding)
 
 ### Linux Architecture: The Three-Layer Model

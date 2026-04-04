@@ -6,6 +6,59 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [1. Concept (Senior-Level Understanding)](#1-concept-senior-level-understanding)
+  - [Kernel Extensibility and Containerization Building Blocks](#kernel-extensibility-and-containerization-building-blocks)
+  - [Kernel Internals Architecture Overview](#kernel-internals-architecture-overview)
+- [2. Internal Working (Kernel-Level Deep Dive)](#2-internal-working-kernel-level-deep-dive)
+  - [2.1 Kernel Module Loading Path](#21-kernel-module-loading-path)
+  - [2.2 cgroups v2 Unified Hierarchy](#22-cgroups-v2-unified-hierarchy)
+  - [2.3 Namespace Isolation Layers](#23-namespace-isolation-layers)
+  - [2.4 How Containers Compose Kernel Primitives](#24-how-containers-compose-kernel-primitives)
+- [3. Commands (Production Reference)](#3-commands-production-reference)
+  - [Kernel Module Management](#kernel-module-management)
+  - [Kernel Tuning with sysctl](#kernel-tuning-with-sysctl)
+  - [cgroup v2 Management](#cgroup-v2-management)
+  - [Namespace Operations](#namespace-operations)
+- [4. Debugging (Production Scenarios)](#4-debugging-production-scenarios)
+  - [Container Resource Issue Debugging Tree](#container-resource-issue-debugging-tree)
+  - [Debugging Checklists](#debugging-checklists)
+- [5. Real-World Incidents](#5-real-world-incidents)
+  - [Incident 1: Kernel Module Taint Causes Vendor Support Rejection](#incident-1-kernel-module-taint-causes-vendor-support-rejection)
+  - [Incident 2: cgroup OOM Kill Cascade in Kubernetes](#incident-2-cgroup-oom-kill-cascade-in-kubernetes)
+  - [Incident 3: PID Namespace Exhaustion from Zombie Accumulation](#incident-3-pid-namespace-exhaustion-from-zombie-accumulation)
+  - [Incident 4: cgroups v1-to-v2 Migration Breaks Production Monitoring](#incident-4-cgroups-v1-to-v2-migration-breaks-production-monitoring)
+  - [Incident 5: Kernel Panic from Unsigned Third-Party GPU Module](#incident-5-kernel-panic-from-unsigned-third-party-gpu-module)
+- [6. Interview Questions (15+ Senior/Staff Level)](#6-interview-questions-15-seniorstaff-level)
+  - [Q1: Explain the difference between insmod and modprobe. Why should you never use insmod in production?](#q1-explain-the-difference-between-insmod-and-modprobe-why-should-you-never-use-insmod-in-production)
+  - [Q2: What does it mean for the kernel to be "tainted"? How do you decode the taint flags?](#q2-what-does-it-mean-for-the-kernel-to-be-tainted-how-do-you-decode-the-taint-flags)
+  - [Q3: Explain cgroups v2 unified hierarchy. How does it differ from v1, and why does it matter for Kubernetes?](#q3-explain-cgroups-v2-unified-hierarchy-how-does-it-differ-from-v1-and-why-does-it-matter-for-kubernetes)
+  - [Q4: How would you set a CPU limit of exactly 2.5 cores for a process using cgroups v2?](#q4-how-would-you-set-a-cpu-limit-of-exactly-25-cores-for-a-process-using-cgroups-v2)
+  - [Q5: List all 8 Linux namespace types and explain a production scenario for each.](#q5-list-all-8-linux-namespace-types-and-explain-a-production-scenario-for-each)
+  - [Q6: What happens at the kernel level when a container is OOM-killed? Walk through the entire chain.](#q6-what-happens-at-the-kernel-level-when-a-container-is-oom-killed-walk-through-the-entire-chain)
+  - [Q7: How do you enter a running container's namespaces without using `docker exec`?](#q7-how-do-you-enter-a-running-containers-namespaces-without-using-docker-exec)
+  - [Q8: Explain the "no internal processes" rule in cgroups v2.](#q8-explain-the-no-internal-processes-rule-in-cgroups-v2)
+  - [Q9: What is seccomp-BPF and how does Docker use it?](#q9-what-is-seccomp-bpf-and-how-does-docker-use-it)
+  - [Q10: How would you debug a container that cannot reach the network?](#q10-how-would-you-debug-a-container-that-cannot-reach-the-network)
+  - [Q11: What are Linux capabilities and why are they critical for container security?](#q11-what-are-linux-capabilities-and-why-are-they-critical-for-container-security)
+  - [Q12: Explain how cgroup PSI (Pressure Stall Information) works and how you would use it for container autoscaling.](#q12-explain-how-cgroup-psi-pressure-stall-information-works-and-how-you-would-use-it-for-container-autoscaling)
+  - [Q13: A developer wants to run Docker inside a Docker container. What are the kernel-level implications?](#q13-a-developer-wants-to-run-docker-inside-a-docker-container-what-are-the-kernel-level-implications)
+  - [Q14: How does the cgroup `memory.high` setting differ from `memory.max`, and when would you use each?](#q14-how-does-the-cgroup-memoryhigh-setting-differ-from-memorymax-and-when-would-you-use-each)
+  - [Q15: Describe how user namespaces enable rootless containers and their security implications.](#q15-describe-how-user-namespaces-enable-rootless-containers-and-their-security-implications)
+  - [Q16: Walk through what happens when you run `unshare --pid --fork --mount-proc bash`.](#q16-walk-through-what-happens-when-you-run-unshare---pid---fork---mount-proc-bash)
+- [7. Common Pitfalls](#7-common-pitfalls)
+- [8. Pro Tips (Staff+ Level)](#8-pro-tips-staff-level)
+- [9. Quick Reference / Cheatsheet](#9-quick-reference-cheatsheet)
+  - [Module Management One-Liners](#module-management-one-liners)
+  - [cgroup v2 Key Files](#cgroup-v2-key-files)
+  - [Namespace Quick Reference](#namespace-quick-reference)
+  - [Critical sysctls for Containers](#critical-sysctls-for-containers)
+  - [Emergency Playbook](#emergency-playbook)
+
+<!-- toc stop -->
+
 ## 1. Concept (Senior-Level Understanding)
 
 ### Kernel Extensibility and Containerization Building Blocks

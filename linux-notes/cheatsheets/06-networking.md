@@ -5,6 +5,25 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [Socket and Connection Analysis (ss)](#socket-and-connection-analysis-ss)
+- [IP, Routing, and Neighbors](#ip-routing-and-neighbors)
+- [Packet Capture (tcpdump)](#packet-capture-tcpdump)
+- [DNS Debugging](#dns-debugging)
+- [Netfilter / Firewall](#netfilter-firewall)
+- [Connection Tracking (conntrack)](#connection-tracking-conntrack)
+- [NIC and Hardware (ethtool)](#nic-and-hardware-ethtool)
+- [Network Statistics](#network-statistics)
+- [Critical Sysctl Parameters](#critical-sysctl-parameters)
+- [TCP State Quick Reference](#tcp-state-quick-reference)
+- [Key /proc/net Files](#key-procnet-files)
+- [Emergency One-Liners](#emergency-one-liners)
+- [Common Misconceptions](#common-misconceptions)
+
+<!-- toc stop -->
+
 ## Socket and Connection Analysis (ss)
 
 ```bash

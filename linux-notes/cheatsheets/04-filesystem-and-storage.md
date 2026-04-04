@@ -5,6 +5,27 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [Filesystem Health at a Glance](#filesystem-health-at-a-glance)
+- [Essential Commands](#essential-commands)
+  - [Quick Health Check](#quick-health-check)
+  - [Space Investigation](#space-investigation)
+  - [Inode Investigation](#inode-investigation)
+  - [I/O Performance](#io-performance)
+  - [Filesystem Operations](#filesystem-operations)
+  - [I/O Scheduler Management](#io-scheduler-management)
+- [Filesystem Comparison](#filesystem-comparison)
+- [I/O Scheduler Quick Reference](#io-scheduler-quick-reference)
+- [Journaling Modes (ext4)](#journaling-modes-ext4)
+- [Key /proc and /sys Paths](#key-proc-and-sys-paths)
+- [Kernel Tunables](#kernel-tunables)
+- [Emergency Procedures](#emergency-procedures)
+- [Interview One-Liners](#interview-one-liners)
+
+<!-- toc stop -->
+
 ## Filesystem Health at a Glance
 
 ```mermaid

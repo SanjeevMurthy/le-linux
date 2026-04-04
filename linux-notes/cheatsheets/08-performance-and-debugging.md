@@ -5,6 +5,28 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [The 60-Second Performance Checklist](#the-60-second-performance-checklist)
+- [PSI (Pressure Stall Information) -- Kernel 4.20+](#psi-pressure-stall-information----kernel-420)
+- [USE Method Quick Reference](#use-method-quick-reference)
+- [vmstat Column Reference](#vmstat-column-reference)
+- [iostat Column Reference](#iostat-column-reference)
+- [CPU Profiling (perf)](#cpu-profiling-perf)
+- [strace (Development/Non-Production Only)](#strace-developmentnon-production-only)
+- [eBPF / BCC Essential Tools](#ebpf-bcc-essential-tools)
+- [bpftrace One-Liners](#bpftrace-one-liners)
+- [ftrace / trace-cmd](#ftrace-trace-cmd)
+- [Network Performance](#network-performance)
+- [Memory Diagnostics](#memory-diagnostics)
+- [Disk and Filesystem Diagnostics](#disk-and-filesystem-diagnostics)
+- [kdump / crash (Kernel Panic Analysis)](#kdump-crash-kernel-panic-analysis)
+- [Key /proc Files](#key-proc-files)
+- [Decision Tree: "My Server Is Slow"](#decision-tree-my-server-is-slow)
+
+<!-- toc stop -->
+
 ## The 60-Second Performance Checklist
 
 ```bash

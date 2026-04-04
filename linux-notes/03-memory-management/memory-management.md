@@ -6,6 +6,49 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [1. Concept (Senior-Level Understanding)](#1-concept-senior-level-understanding)
+  - [The Linux Memory Model: Virtual Memory and Demand Paging](#the-linux-memory-model-virtual-memory-and-demand-paging)
+  - [Memory Subsystem Architecture](#memory-subsystem-architecture)
+  - [Overcommit Philosophy: Why Linux Promises More Than It Has](#overcommit-philosophy-why-linux-promises-more-than-it-has)
+- [2. Internal Working (Kernel-Level Deep Dive)](#2-internal-working-kernel-level-deep-dive)
+  - [Page Table Hierarchy: Virtual-to-Physical Translation](#page-table-hierarchy-virtual-to-physical-translation)
+  - [Page Fault Handling](#page-fault-handling)
+  - [Memory Zones and the Buddy Allocator](#memory-zones-and-the-buddy-allocator)
+  - [SLAB/SLUB Allocator](#slabslub-allocator)
+  - [Page Cache: The Unified Cache](#page-cache-the-unified-cache)
+  - [Memory Reclaim: kswapd, Direct Reclaim, and Watermarks](#memory-reclaim-kswapd-direct-reclaim-and-watermarks)
+  - [OOM Killer](#oom-killer)
+- [3. Commands + Practical Examples](#3-commands-practical-examples)
+  - [free -- Memory Overview](#free----memory-overview)
+  - [/proc/meminfo Deep Dive](#procmeminfo-deep-dive)
+  - [vmstat -- Real-time Memory Stats](#vmstat----real-time-memory-stats)
+  - [numastat and numactl -- NUMA Analysis](#numastat-and-numactl----numa-analysis)
+  - [Process-Level Memory Analysis](#process-level-memory-analysis)
+  - [slabtop -- Kernel Memory Allocation](#slabtop----kernel-memory-allocation)
+- [4. Advanced Debugging & Observability](#4-advanced-debugging-observability)
+  - [Memory Debugging Decision Tree](#memory-debugging-decision-tree)
+  - [eBPF Memory Tools (bcc/bpftrace)](#ebpf-memory-tools-bccbpftrace)
+  - [Kernel Memory Leak Detection](#kernel-memory-leak-detection)
+- [5. Real-World Production Scenarios](#5-real-world-production-scenarios)
+  - [Incident 1: OOM Killer Targeting Critical Database Instead of Batch Job](#incident-1-oom-killer-targeting-critical-database-instead-of-batch-job)
+  - [Incident 2: Page Cache Growth Mistaken for Application Memory Leak](#incident-2-page-cache-growth-mistaken-for-application-memory-leak)
+  - [Incident 3: NUMA Imbalance Causing 3x Latency on Database Queries](#incident-3-numa-imbalance-causing-3x-latency-on-database-queries)
+  - [Incident 4: Swap Storm from Aggressive Overcommit on 256 GiB Hosts](#incident-4-swap-storm-from-aggressive-overcommit-on-256-gib-hosts)
+  - [Incident 5: Transparent Huge Pages Causing Latency Jitter in Redis](#incident-5-transparent-huge-pages-causing-latency-jitter-in-redis)
+- [6. Advanced Interview Questions](#6-advanced-interview-questions)
+  - [Conceptual Deep Questions](#conceptual-deep-questions)
+  - [Scenario-Based Questions](#scenario-based-questions)
+  - [Debugging Questions](#debugging-questions)
+  - [Trick Questions](#trick-questions)
+- [7. Common Pitfalls & Misconceptions](#7-common-pitfalls-misconceptions)
+- [8. Pro Tips (From 15+ Years Experience)](#8-pro-tips-from-15-years-experience)
+- [9. Cheatsheet](#9-cheatsheet)
+
+<!-- toc stop -->
+
 ## 1. Concept (Senior-Level Understanding)
 
 ### The Linux Memory Model: Virtual Memory and Demand Paging

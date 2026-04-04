@@ -6,6 +6,39 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [How to Use This File](#how-to-use-this-file)
+- [Category 1: Conceptual Deep Questions](#category-1-conceptual-deep-questions)
+  - [Q1. Explain the difference between load average and CPU utilization. Why can you have a load average of 50 on a 16-core system with 5% CPU utilization?](#q1-explain-the-difference-between-load-average-and-cpu-utilization-why-can-you-have-a-load-average-of-50-on-a-16-core-system-with-5-cpu-utilization)
+  - [Q2. How does CFS calculate time slices? What happens to time slices as the number of runnable tasks increases?](#q2-how-does-cfs-calculate-time-slices-what-happens-to-time-slices-as-the-number-of-runnable-tasks-increases)
+  - [Q3. Explain EEVDF and how it improves upon CFS. What specific problems did CFS have that EEVDF solves?](#q3-explain-eevdf-and-how-it-improves-upon-cfs-what-specific-problems-did-cfs-have-that-eevdf-solves)
+  - [Q4. What is the relationship between scheduling priority, nice value, and weight in the Linux kernel? Why is the mapping exponential rather than linear?](#q4-what-is-the-relationship-between-scheduling-priority-nice-value-and-weight-in-the-linux-kernel-why-is-the-mapping-exponential-rather-than-linear)
+  - [Q5. Describe the three parameters of SCHED_DEADLINE (runtime, deadline, period) and how the kernel's admission control works.](#q5-describe-the-three-parameters-of-sched_deadline-runtime-deadline-period-and-how-the-kernels-admission-control-works)
+- [Category 2: Scenario-Based Questions](#category-2-scenario-based-questions)
+  - [Q6. Your team's latency-sensitive API service is experiencing p99 latency spikes every 30 seconds. The spikes last 2-3 seconds. CPU utilization is normal. What do you investigate?](#q6-your-teams-latency-sensitive-api-service-is-experiencing-p99-latency-spikes-every-30-seconds-the-spikes-last-2-3-seconds-cpu-utilization-is-normal-what-do-you-investigate)
+  - [Q7. After deploying a new version, your service's CPU utilization jumped from 40% to 85%. How do you methodically identify the cause?](#q7-after-deploying-a-new-version-your-services-cpu-utilization-jumped-from-40-to-85-how-do-you-methodically-identify-the-cause)
+  - [Q8. You notice that a specific CPU core is at 100% while all other cores are near idle. What could cause this, and how do you fix it?](#q8-you-notice-that-a-specific-cpu-core-is-at-100-while-all-other-cores-are-near-idle-what-could-cause-this-and-how-do-you-fix-it)
+  - [Q9. A containerized workload is using exactly its CPU limit but its actual throughput is 30% lower than expected. The same workload on bare-metal with the same core count performs fine. Diagnose.](#q9-a-containerized-workload-is-using-exactly-its-cpu-limit-but-its-actual-throughput-is-30-lower-than-expected-the-same-workload-on-bare-metal-with-the-same-core-count-performs-fine-diagnose)
+  - [Q10. Production Redis instances show bimodal latency: some operations at 50us, others at 120us, with no pattern. How do you investigate?](#q10-production-redis-instances-show-bimodal-latency-some-operations-at-50us-others-at-120us-with-no-pattern-how-do-you-investigate)
+- [Category 3: Debugging Questions](#category-3-debugging-questions)
+  - [Q11. Walk through exactly how you would use `perf sched` to diagnose a scheduling latency problem.](#q11-walk-through-exactly-how-you-would-use-perf-sched-to-diagnose-a-scheduling-latency-problem)
+  - [Q12. A process has 50,000 involuntary context switches per second. Is this a problem? How do you determine the cause?](#q12-a-process-has-50000-involuntary-context-switches-per-second-is-this-a-problem-how-do-you-determine-the-cause)
+  - [Q13. Explain what `/proc/sched_debug` shows and when you would use it.](#q13-explain-what-procsched_debug-shows-and-when-you-would-use-it)
+  - [Q14. How do you identify and resolve CPU throttling in a Kubernetes pod?](#q14-how-do-you-identify-and-resolve-cpu-throttling-in-a-kubernetes-pod)
+- [Category 4: Trick Questions](#category-4-trick-questions)
+  - [Q15. A system with 8 cores shows a load average of 4. Is the system underutilized, overloaded, or properly loaded?](#q15-a-system-with-8-cores-shows-a-load-average-of-4-is-the-system-underutilized-overloaded-or-properly-loaded)
+  - [Q16. If you set a process to nice -20, does it get "all the CPU"?](#q16-if-you-set-a-process-to-nice--20-does-it-get-all-the-cpu)
+  - [Q17. Can a SCHED_IDLE task starve a SCHED_NORMAL task?](#q17-can-a-sched_idle-task-starve-a-sched_normal-task)
+  - [Q18. Load average is 0.01 on an 8-core machine. Is the system definitely idle?](#q18-load-average-is-001-on-an-8-core-machine-is-the-system-definitely-idle)
+- [Bonus Questions](#bonus-questions)
+  - [Q19. Your application runs fine on kernel 6.5 but shows 15% higher tail latency on kernel 6.6. What scheduler change should you investigate?](#q19-your-application-runs-fine-on-kernel-65-but-shows-15-higher-tail-latency-on-kernel-66-what-scheduler-change-should-you-investigate)
+  - [Q20. Explain how cgroups v2 cpu.weight and cpu.max interact. If a cgroup has weight 200 and max "100000 100000", which takes precedence?](#q20-explain-how-cgroups-v2-cpuweight-and-cpumax-interact-if-a-cgroup-has-weight-200-and-max-100000-100000-which-takes-precedence)
+  - [Q21. A developer wants to set their monitoring agent to SCHED_FIFO priority 99 "for reliability." Explain why this is dangerous and propose alternatives.](#q21-a-developer-wants-to-set-their-monitoring-agent-to-sched_fifo-priority-99-for-reliability-explain-why-this-is-dangerous-and-propose-alternatives)
+
+<!-- toc stop -->
+
 ## How to Use This File
 
 - Questions are organized by category and tagged with difficulty level

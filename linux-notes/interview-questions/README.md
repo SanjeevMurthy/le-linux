@@ -4,6 +4,24 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [Question Files](#question-files)
+- [Questions by Difficulty](#questions-by-difficulty)
+  - [Senior (L5/E5) -- Foundations](#senior-l5e5----foundations)
+  - [Staff (L6/E6) -- Deep Internals and Production Expertise](#staff-l6e6----deep-internals-and-production-expertise)
+  - [Principal (L7+/E7+) -- Architecture and Deep Kernel Knowledge](#principal-l7e7----architecture-and-deep-kernel-knowledge)
+- [Questions by Type](#questions-by-type)
+  - [Conceptual (Test your mental model)](#conceptual-test-your-mental-model)
+  - [Scenario (Test your debugging approach)](#scenario-test-your-debugging-approach)
+  - [Debugging (Test your command-line skills)](#debugging-test-your-command-line-skills)
+  - [Trick Questions (Test precision under pressure)](#trick-questions-test-precision-under-pressure)
+- [Recommended Study Order](#recommended-study-order)
+- [Top 10 Most Likely to Be Asked](#top-10-most-likely-to-be-asked)
+
+<!-- toc stop -->
+
 ## Question Files
 
 | # | Topic | Questions | Link |

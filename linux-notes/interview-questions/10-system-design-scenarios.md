@@ -5,6 +5,29 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [Q1: You are designing a log aggregation pipeline for 50,000 Linux hosts. Walk through your architecture and Linux-specific decisions.](#q1-you-are-designing-a-log-aggregation-pipeline-for-50000-linux-hosts-walk-through-your-architecture-and-linux-specific-decisions)
+- [Q2: Explain the complete chain from `kubectl run` to a running container process. Map each step to a Linux primitive.](#q2-explain-the-complete-chain-from-kubectl-run-to-a-running-container-process-map-each-step-to-a-linux-primitive)
+- [Q3: Compare bare metal, VMs, containers, and containers-on-VMs. When would you recommend each?](#q3-compare-bare-metal-vms-containers-and-containers-on-vms-when-would-you-recommend-each)
+- [Q4: How do cgroupv2 controllers provide multi-tenant resource isolation? Detail the specific controllers and their semantics.](#q4-how-do-cgroupv2-controllers-provide-multi-tenant-resource-isolation-detail-the-specific-controllers-and-their-semantics)
+- [Q5: Design a fleet-wide kernel upgrade process for 50,000 hosts with zero user-facing downtime.](#q5-design-a-fleet-wide-kernel-upgrade-process-for-50000-hosts-with-zero-user-facing-downtime)
+- [Q6: What is the difference between `memory.min`, `memory.low`, `memory.high`, and `memory.max`? Design a config for a production Java service.](#q6-what-is-the-difference-between-memorymin-memorylow-memoryhigh-and-memorymax-design-a-config-for-a-production-java-service)
+- [Q7: How would you detect and remediate configuration drift across 10,000 Linux hosts?](#q7-how-would-you-detect-and-remediate-configuration-drift-across-10000-linux-hosts)
+- [Q8: Design the networking layer for a container platform. How do containers on different hosts communicate?](#q8-design-the-networking-layer-for-a-container-platform-how-do-containers-on-different-hosts-communicate)
+- [Q9: What is an error budget and how does it drive infrastructure decisions? Give concrete examples.](#q9-what-is-an-error-budget-and-how-does-it-drive-infrastructure-decisions-give-concrete-examples)
+- [Q10: Explain PSI (Pressure Stall Information). How would you use it for fleet-wide capacity planning?](#q10-explain-psi-pressure-stall-information-how-would-you-use-it-for-fleet-wide-capacity-planning)
+- [Q11: How would you build a container from scratch using only Linux primitives?](#q11-how-would-you-build-a-container-from-scratch-using-only-linux-primitives)
+- [Q12: You observe intermittent OOM kills on Kubernetes nodes. Investigate and resolve.](#q12-you-observe-intermittent-oom-kills-on-kubernetes-nodes-investigate-and-resolve)
+- [Q13: Explain overlayfs and why it is critical for containers.](#q13-explain-overlayfs-and-why-it-is-critical-for-containers)
+- [Q14: Design a multi-tenant compute platform with strong resource isolation for 200 teams.](#q14-design-a-multi-tenant-compute-platform-with-strong-resource-isolation-for-200-teams)
+- [Q15: How does the shared kernel in containers create security risks? How do you mitigate them?](#q15-how-does-the-shared-kernel-in-containers-create-security-risks-how-do-you-mitigate-them)
+- [Q16: Describe immutable infrastructure. How does it interact with Linux system management?](#q16-describe-immutable-infrastructure-how-does-it-interact-with-linux-system-management)
+- [Q17: Design capacity planning for a platform serving 200 teams on shared infrastructure.](#q17-design-capacity-planning-for-a-platform-serving-200-teams-on-shared-infrastructure)
+
+<!-- toc stop -->
+
 ## Q1: You are designing a log aggregation pipeline for 50,000 Linux hosts. Walk through your architecture and Linux-specific decisions.
 
 1. **Collection layer (per host):**

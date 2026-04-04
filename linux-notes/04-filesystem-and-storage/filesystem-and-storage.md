@@ -6,6 +6,51 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [1. Concept (Senior-Level Understanding)](#1-concept-senior-level-understanding)
+  - [The Linux Filesystem Model: Everything Is a File](#the-linux-filesystem-model-everything-is-a-file)
+  - [The Virtual File System (VFS): The Kernel's Indirection Layer](#the-virtual-file-system-vfs-the-kernels-indirection-layer)
+  - [Design Philosophy: Trade-offs That Matter in Production](#design-philosophy-trade-offs-that-matter-in-production)
+  - [Hard Links vs. Soft Links: The Inode-Level Explanation](#hard-links-vs-soft-links-the-inode-level-explanation)
+- [2. Internal Working (Kernel-Level Deep Dive)](#2-internal-working-kernel-level-deep-dive)
+  - [VFS Core Data Structures](#vfs-core-data-structures)
+  - [The Three-Table File Descriptor Architecture](#the-three-table-file-descriptor-architecture)
+  - [ext4 Inode Internals: From Block Pointers to Extent Trees](#ext4-inode-internals-from-block-pointers-to-extent-trees)
+  - [Journaling Internals](#journaling-internals)
+  - [I/O Schedulers: Multi-Queue Architecture](#io-schedulers-multi-queue-architecture)
+- [3. Commands (Production Reference)](#3-commands-production-reference)
+  - [Filesystem Information and Mounting](#filesystem-information-and-mounting)
+  - [Inode and File Investigation](#inode-and-file-investigation)
+  - [Open Files and File Descriptors](#open-files-and-file-descriptors)
+  - [I/O Performance Monitoring](#io-performance-monitoring)
+  - [Filesystem Check and Repair](#filesystem-check-and-repair)
+- [4. Debugging (Production Scenarios)](#4-debugging-production-scenarios)
+  - [I/O Bottleneck Decision Tree](#io-bottleneck-decision-tree)
+  - [Debugging Stale NFS Handles](#debugging-stale-nfs-handles)
+  - [Debugging Filesystem Corruption](#debugging-filesystem-corruption)
+- [5. FAANG-Level Incidents](#5-faang-level-incidents)
+  - [Incident 1: Inode Exhaustion from Millions of Container Log Fragments](#incident-1-inode-exhaustion-from-millions-of-container-log-fragments)
+  - [Incident 2: Journal Corruption After Unexpected Power Loss on ext4](#incident-2-journal-corruption-after-unexpected-power-loss-on-ext4)
+  - [Incident 3: I/O Scheduler Causing Tail Latency for Database Workload](#incident-3-io-scheduler-causing-tail-latency-for-database-workload)
+  - [Incident 4: Filesystem Full from Deleted-but-Open Files](#incident-4-filesystem-full-from-deleted-but-open-files)
+  - [Incident 5: XFS Extent Tree Corruption Causing Silent Data Loss](#incident-5-xfs-extent-tree-corruption-causing-silent-data-loss)
+- [6. Interview Questions](#6-interview-questions)
+  - [Category 1: Conceptual Deep Questions](#category-1-conceptual-deep-questions)
+  - [Category 2: Scenario-Based Debugging](#category-2-scenario-based-debugging)
+  - [Category 3: Architecture & Design](#category-3-architecture-design)
+  - [Category 4: Quick-Fire / Trivia](#category-4-quick-fire-trivia)
+- [7. Common Pitfalls](#7-common-pitfalls)
+- [8. Pro Tips](#8-pro-tips)
+- [9. Quick Reference Cheatsheet](#9-quick-reference-cheatsheet)
+  - [Filesystem Comparison at a Glance](#filesystem-comparison-at-a-glance)
+  - [Essential One-Liners](#essential-one-liners)
+  - [/proc and /sys Filesystem Paths](#proc-and-sys-filesystem-paths)
+  - [Kernel Tunables for I/O](#kernel-tunables-for-io)
+
+<!-- toc stop -->
+
 ## 1. Concept (Senior-Level Understanding)
 
 ### The Linux Filesystem Model: Everything Is a File
