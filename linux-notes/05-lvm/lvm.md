@@ -61,6 +61,9 @@
 
 <!-- toc stop -->
 
+<img width="2752" height="1536" alt="image" src="https://github.com/user-attachments/assets/48667b29-b796-425e-97d7-c129eb17921b" />
+
+
 ## 1. Concept (Senior-Level Understanding)
 
 ### Why LVM Exists: The Abstraction Problem
