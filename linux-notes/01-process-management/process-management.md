@@ -61,6 +61,9 @@
 
 <!-- toc stop -->
 
+<img width="2752" height="1536" alt="image" src="https://github.com/user-attachments/assets/ec259257-3b3c-4dc0-bf0a-49dde46b2cab" />
+
+
 ## Section 1: Concept (Senior-Level Understanding)
 
 ### The Linux Process Model
