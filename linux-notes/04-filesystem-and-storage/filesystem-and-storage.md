@@ -51,6 +51,9 @@
 
 <!-- toc stop -->
 
+<img width="2752" height="1536" alt="image" src="https://github.com/user-attachments/assets/1fccab68-1715-4808-b122-00b1984eda55" />
+
+
 ## 1. Concept (Senior-Level Understanding)
 
 ### The Linux Filesystem Model: Everything Is a File
