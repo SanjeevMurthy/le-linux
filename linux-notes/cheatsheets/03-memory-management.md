@@ -250,11 +250,11 @@ flowchart TD
 
 ```mermaid
 graph LR
-    CR3["CR3 Register<br/>(per-process)"] --> PGD["PGD<br/>512 entries<br/>Bits [47:39]"]
-    PGD --> PUD["PUD<br/>512 entries<br/>Bits [38:30]"]
-    PUD --> PMD["PMD<br/>512 entries<br/>Bits [29:21]"]
-    PMD --> PTE["PTE<br/>512 entries<br/>Bits [20:12]"]
-    PTE --> PF["Page Frame<br/>4 KiB page<br/>Bits [11:0] offset"]
+    CR3["CR3 Register<br/>(per-process)"] --> PGD[""PGD<br/>512 entries<br/>Bits [47:39"]"]
+    PGD --> PUD[""PUD<br/>512 entries<br/>Bits [38:30"]"]
+    PUD --> PMD[""PMD<br/>512 entries<br/>Bits [29:21"]"]
+    PMD --> PTE[""PTE<br/>512 entries<br/>Bits [20:12"]"]
+    PTE --> PF[""Page Frame<br/>4 KiB page<br/>Bits [11:0"] offset"]
 
     PUD -.->|"1 GiB Huge Page<br/>(if PSE bit set)"| HP1G["1 GiB Page"]
     PMD -.->|"2 MiB Huge Page<br/>(if PSE bit set)"| HP2M["2 MiB Page"]

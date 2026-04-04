@@ -9,17 +9,17 @@
 
 ```mermaid
 flowchart TD
-    A["POWER ON"] --> B["FIRMWARE\n(BIOS POST / UEFI Init)"]
-    B --> |"CPU reset vector → firmware code\nHardware enumeration, RAM check\nBIOS: read MBR | UEFI: read ESP + GPT"| C["BOOTLOADER (GRUB2)"]
-    C --> |"Parse grub.cfg\nLoad vmlinuz + initramfs\nPass kernel command line"| D["KERNEL\n(start_kernel)"]
+    A["POWER ON"] --> B["FIRMWARE<br/>(BIOS POST / UEFI Init)"]
+    B --> |"CPU reset vector → firmware code<br/>Hardware enumeration, RAM check<br/>BIOS: read MBR | UEFI: read ESP + GPT"| C["BOOTLOADER (GRUB2)"]
+    C --> |"Parse grub.cfg<br/>Load vmlinuz + initramfs<br/>Pass kernel command line"| D["KERNEL<br/>(start_kernel)"]
     D --> D1["CPU inspection + mode setup"]
     D --> D2["Memory management init"]
     D --> D3["Scheduler init"]
     D --> D4["Device bus + driver discovery"]
     D --> D5["Mount initramfs as /"]
     D5 --> E["INITRAMFS"]
-    E --> |"Load storage drivers\nAssemble root device\nswitch_root to real rootfs"| F["SYSTEMD (PID 1)"]
-    F --> |"Parse default.target\nBuild dependency graph\nActivate units in PARALLEL"| G["multi-user.target"]
+    E --> |"Load storage drivers<br/>Assemble root device<br/>switch_root to real rootfs"| F["SYSTEMD (PID 1)"]
+    F --> |"Parse default.target<br/>Build dependency graph<br/>Activate units in PARALLEL"| G["multi-user.target"]
     G --> H["LOGIN / SSH READY"]
 ```
 
@@ -135,12 +135,12 @@ systemctl unmask <unit>                  # Reverse mask
 ```mermaid
 flowchart LR
     A["Application"] --> B["glibc wrapper"]
-    B --> |"RAX=syscall#\nRDI-R9=args"| C["SYSCALL instruction"]
+    B --> |"RAX=syscall#<br/>RDI-R9=args"| C["SYSCALL instruction"]
     C --> |"Ring 3 → Ring 0"| D["entry_SYSCALL_64"]
-    D --> E["sys_call_table[RAX]"]
+    D --> E[""sys_call_table[RAX"]"]
     E --> F["Handler"]
-    F --> |"SYSRET\nRing 0 → Ring 3"| G["glibc"]
-    G --> |"check RAX\nset errno"| H["Application"]
+    F --> |"SYSRET<br/>Ring 0 → Ring 3"| G["glibc"]
+    G --> |"check RAX<br/>set errno"| H["Application"]
 ```
 
 | Register | Purpose |
@@ -250,17 +250,17 @@ quiet loglevel=3
 ```mermaid
 flowchart TD
     A{"System won't boot?"} --> B{"Where does it fail?"}
-    B --> |"No display"| C["Check hardware\nPOST beep codes\nSerial console"]
-    B --> |"GRUB error"| D["GRUB rescue\nls, set root, linux, initrd, boot"]
-    B --> |"Kernel panic:\nVFS mount"| E["initramfs missing driver\nRebuild with dracut/update-initramfs"]
-    B --> |"Kernel panic:\nmodule"| F["Boot previous kernel\nBlacklist module"]
-    B --> |"systemd hangs"| G["rescue.target or\nemergency.target"]
-    B --> |"Service fails"| H["systemctl status\njournalctl -u unit"]
-    B --> |"Boot slow"| I["systemd-analyze blame\ncritical-chain"]
+    B --> |"No display"| C["Check hardware<br/>POST beep codes<br/>Serial console"]
+    B --> |"GRUB error"| D["GRUB rescue<br/>ls, set root, linux, initrd, boot"]
+    B --> |"Kernel panic:<br/>VFS mount"| E["initramfs missing driver<br/>Rebuild with dracut/update-initramfs"]
+    B --> |"Kernel panic:<br/>module"| F["Boot previous kernel<br/>Blacklist module"]
+    B --> |"systemd hangs"| G["rescue.target or<br/>emergency.target"]
+    B --> |"Service fails"| H["systemctl status<br/>journalctl -u unit"]
+    B --> |"Boot slow"| I["systemd-analyze blame<br/>critical-chain"]
 
-    J{"Kernel panic\npost-mortem?"} --> K["kdump → crash utility\n/var/crash/timestamp/vmcore"]
+    J{"Kernel panic<br/>post-mortem?"} --> K["kdump → crash utility<br/>/var/crash/timestamp/vmcore"]
     J --> L["crash: bt, log, ps"]
-    J --> M["Check modinfo vermagic\nmatches running kernel"]
+    J --> M["Check modinfo vermagic<br/>matches running kernel"]
 ```
 
 ---

@@ -15,26 +15,26 @@ Linux follows a **monolithic kernel** architecture with a strict separation betw
 ```mermaid
 graph TB
     subgraph "User Space (Ring 3)"
-        A[Applications<br/>nginx, postgres, java]
-        B[System Services<br/>systemd, sshd, cron]
-        C[Shell & Utilities<br/>bash, coreutils, strace]
-        D[C Library - glibc/musl<br/>POSIX API wrapper]
+        A["Applications<br/>nginx, postgres, java"]
+        B["System Services<br/>systemd, sshd, cron"]
+        C["Shell & Utilities<br/>bash, coreutils, strace"]
+        D["C Library - glibc/musl<br/>POSIX API wrapper"]
     end
 
     subgraph "Kernel Space (Ring 0)"
-        E[System Call Interface<br/>~450 syscalls on x86_64]
-        F[Process Scheduler<br/>CFS / EEVDF]
-        G[Memory Management<br/>Page tables, slab allocator]
-        H[VFS Layer<br/>Unified filesystem abstraction]
-        I[Network Stack<br/>Netfilter, TCP/IP, socket layer]
-        J[Device Drivers<br/>Block, char, network drivers]
+        E["System Call Interface<br/>~450 syscalls on x86_64"]
+        F["Process Scheduler<br/>CFS / EEVDF"]
+        G["Memory Management<br/>Page tables, slab allocator"]
+        H["VFS Layer<br/>Unified filesystem abstraction"]
+        I["Network Stack<br/>Netfilter, TCP/IP, socket layer"]
+        J["Device Drivers<br/>Block, char, network drivers"]
     end
 
     subgraph "Hardware"
         K[CPU / MMU]
         L[RAM / Cache hierarchy]
-        M[Storage: NVMe, SCSI, virtio]
-        N[Network: NICs, virtual devices]
+        M["Storage: NVMe, SCSI, virtio"]
+        N["Network: NICs, virtual devices"]
     end
 
     A --> D
@@ -180,24 +180,24 @@ The system call is the fundamental boundary crossing in Linux. Here is the exact
 ```mermaid
 flowchart TD
     subgraph US ["User Space"]
-        A["Application calls glibc wrapper\ne.g., write(fd, buf, count)"]
-        B["glibc wrapper:\n- RAX = syscall # (write = 1 on x86_64)\n- Args in RDI, RSI, RDX, R10, R8, R9\n- Executes SYSCALL instruction"]
-        Z["glibc checks RAX:\n- If negative → set errno, return -1\n- If success → return value to application"]
+        A["Application calls glibc wrapper<br/>e.g., write(fd, buf, count)"]
+        B["glibc wrapper:<br/>- RAX = syscall # (write = 1 on x86_64)<br/>- Args in RDI, RSI, RDX, R10, R8, R9<br/>- Executes SYSCALL instruction"]
+        Z["glibc checks RAX:<br/>- If negative → set errno, return -1<br/>- If success → return value to application"]
     end
 
     subgraph KS ["Kernel Space"]
-        D["entry_SYSCALL_64 (arch/x86/entry/)\n- Saves user registers to pt_regs\n- Switches to kernel stack"]
-        E["sys_call_table[RAX]\n- Dispatch to handler\n- e.g., ksys_write()"]
-        F["VFS layer → filesystem driver\n- Permission checks\n- Page cache interaction\n- Block I/O if needed"]
-        G["Return value in RAX\nSYSRET instruction\n- Restores user registers"]
+        D["entry_SYSCALL_64 (arch/x86/entry/)<br/>- Saves user registers to pt_regs<br/>- Switches to kernel stack"]
+        E[""sys_call_table[RAX"]<br/>- Dispatch to handler<br/>- e.g., ksys_write()"]
+        F["VFS layer → filesystem driver<br/>- Permission checks<br/>- Page cache interaction<br/>- Block I/O if needed"]
+        G["Return value in RAX<br/>SYSRET instruction<br/>- Restores user registers"]
     end
 
     A --> B
-    B -- "CPU: Ring 3 → Ring 0\nMSR_LSTAR → entry point" --> D
+    B -->|"CPU: Ring 3 → Ring 0<br/>MSR_LSTAR → entry point"| D
     D --> E
     E --> F
     F --> G
-    G -- "Ring 0 → Ring 3" --> Z
+    G -->|"Ring 0 → Ring 3"| Z
 ```
 
 #### Evolution of System Call Entry
@@ -355,39 +355,39 @@ cat /proc/<PID>/status | grep -E "voluntary_ctxt|nonvoluntary"
 
 ```mermaid
 flowchart TD
-    A[System Not Booting] --> B{Screen Output?}
+    A[System Not Booting] --> B{"Screen Output?"}
     B -->|No display at all| C[Hardware/Firmware Issue]
     C --> C1[Check POST beep codes]
-    C --> C2[Reseat RAM/GPU, check power]
-    C --> C3[Test with serial console:<br/>console=ttyS0,115200]
+    C --> C2["Reseat RAM/GPU, check power"]
+    C --> C3["Test with serial console:<br/>console=ttyS0,115200"]
 
-    B -->|GRUB menu appears| D{Kernel loads?}
+    B -->|GRUB menu appears| D{"Kernel loads?"}
     D -->|GRUB error: no such partition| E[GRUB Rescue]
-    E --> E1[grub> ls<br/>grub> set root=...<br/>grub> linux /vmlinuz...<br/>grub> initrd /initrd...<br/>grub> boot]
-    E --> E2[Boot rescue USB,<br/>mount, chroot,<br/>grub-install + update-grub]
+    E --> E1["grub> ls<br/>grub> set root=...<br/>grub> linux /vmlinuz...<br/>grub> initrd /initrd...<br/>grub> boot"]
+    E --> E2["Boot rescue USB,<br/>mount, chroot,<br/>grub-install + update-grub"]
 
-    D -->|Kernel starts but panics| F{Panic message?}
+    D -->|Kernel starts but panics| F{"Panic message?"}
     F -->|VFS: Unable to mount root| G[initramfs Issue]
-    G --> G1[Wrong root= in cmdline?<br/>Check UUID vs blkid output]
-    G --> G2[Missing storage driver<br/>in initramfs]
-    G --> G3[Rebuild: dracut -f or<br/>update-initramfs -u]
+    G --> G1["Wrong root= in cmdline?<br/>Check UUID vs blkid output"]
+    G --> G2["Missing storage driver<br/>in initramfs"]
+    G --> G3["Rebuild: dracut -f or<br/>update-initramfs -u"]
 
     F -->|Kernel panic - not syncing| H[Kernel/Module Issue]
-    H --> H1[Boot previous kernel<br/>from GRUB menu]
-    H --> H2[Add rd.break to cmdline<br/>to drop into initramfs shell]
-    H --> H3[Remove problematic module<br/>from /etc/modprobe.d/]
+    H --> H1["Boot previous kernel<br/>from GRUB menu"]
+    H --> H2["Add rd.break to cmdline<br/>to drop into initramfs shell"]
+    H --> H3["Remove problematic module<br/>from /etc/modprobe.d/"]
 
-    D -->|Kernel + initramfs OK| I{systemd starts?}
+    D -->|Kernel + initramfs OK| I{"systemd starts?"}
     I -->|systemd fails or hangs| J[systemd Debug]
-    J --> J1[Add systemd.unit=rescue.target<br/>to kernel cmdline]
-    J --> J2[Add systemd.unit=emergency.target<br/>for minimal shell]
-    J --> J3[journalctl -b -1 -p err<br/>after recovery to find cause]
-    J --> J4[systemctl list-units --failed<br/>to find broken units]
+    J --> J1["Add systemd.unit=rescue.target<br/>to kernel cmdline"]
+    J --> J2["Add systemd.unit=emergency.target<br/>for minimal shell"]
+    J --> J3["journalctl -b -1 -p err<br/>after recovery to find cause"]
+    J --> J4["systemctl list-units --failed<br/>to find broken units"]
 
     I -->|systemd starts but<br/>specific service fails| K[Service Debug]
-    K --> K1[systemctl status service<br/>journalctl -u service]
+    K --> K1["systemctl status service<br/>journalctl -u service"]
     K --> K2[systemd-analyze verify service.unit]
-    K --> K3[Check dependency cycle:<br/>systemd-analyze dot service | dot -Tsvg]
+    K --> K3["Check dependency cycle:<br/>systemd-analyze dot service | dot -Tsvg"]
 ```
 
 ### Boot Failure Triage Procedures
@@ -1022,9 +1022,9 @@ systemctl mask apt-daily.service apt-daily-upgrade.service
 
 ```mermaid
 flowchart TD
-    A["Power On"] --> B["Firmware\n(BIOS POST / UEFI init)"]
-    B --> C["Boot device selection\n(MBR / ESP)"]
-    C --> D["GRUB2 loads\nvmlinuz + initramfs"]
+    A["Power On"] --> B["Firmware<br/>(BIOS POST / UEFI init)"]
+    B --> C["Boot device selection<br/>(MBR / ESP)"]
+    C --> D["GRUB2 loads<br/>vmlinuz + initramfs"]
     D --> E["Kernel: start_kernel()"]
     E --> F["CPU init"]
     E --> G["Memory init"]
@@ -1037,7 +1037,7 @@ flowchart TD
     M --> N["systemd (PID 1)"]
     N --> O["default.target"]
     N --> P["Activate units in parallel"]
-    N --> Q["multi-user.target /\ngraphical.target"]
+    N --> Q["multi-user.target /<br/>graphical.target"]
     Q --> R["Login prompt / SSH"]
 ```
 
@@ -1108,25 +1108,25 @@ dracut --force         # RHEL/Fedora
 ```mermaid
 flowchart TD
     BP{"Boot problem?"}
-    BP -->|No GRUB menu| BP1["Firmware/bootloader issue\n→ rescue media → grub-install"]
-    BP -->|Kernel panics| BP2["Missing initramfs driver\n→ dracut / update-initramfs"]
-    BP -->|systemd hangs| BP3["Add systemd.unit=rescue.target\n→ debug from shell"]
-    BP -->|Service fails| BP4["systemctl status unit\n+ journalctl -u unit"]
-    BP -->|Boot slow| BP5["systemd-analyze blame\n+ critical-chain\n→ disable/optimize units"]
+    BP -->|No GRUB menu| BP1["Firmware/bootloader issue<br/>→ rescue media → grub-install"]
+    BP -->|Kernel panics| BP2["Missing initramfs driver<br/>→ dracut / update-initramfs"]
+    BP -->|systemd hangs| BP3["Add systemd.unit=rescue.target<br/>→ debug from shell"]
+    BP -->|Service fails| BP4["systemctl status unit<br/>+ journalctl -u unit"]
+    BP -->|Boot slow| BP5["systemd-analyze blame<br/>+ critical-chain<br/>→ disable/optimize units"]
 ```
 ```mermaid
 flowchart TD
     KP{"Kernel panic?"}
-    KP -->|kdump available| KP1["Check /var/crash/\n→ crash utility for analysis"]
-    KP -->|Rollback| KP2["Boot previous kernel\nfrom GRUB menu"]
-    KP -->|Suspect module| KP3["Blacklist module:\nmodprobe.blacklist=module"]
+    KP -->|kdump available| KP1["Check /var/crash/<br/>→ crash utility for analysis"]
+    KP -->|Rollback| KP2["Boot previous kernel<br/>from GRUB menu"]
+    KP -->|Suspect module| KP3["Blacklist module:<br/>modprobe.blacklist=module"]
 ```
 ```mermaid
 flowchart TD
-    DS{"Process stuck\nin D-state?"}
-    DS -->|Stack trace| DS1["cat /proc/PID/stack\n→ identify blocked kernel function"]
-    DS -->|I/O health| DS2["iostat -x 1\n→ check I/O health"]
-    DS -->|Storage/network| DS3["Check NFS mounts,\nRAID status, SAN connectivity"]
+    DS{"Process stuck<br/>in D-state?"}
+    DS -->|Stack trace| DS1["cat /proc/PID/stack<br/>→ identify blocked kernel function"]
+    DS -->|I/O health| DS2["iostat -x 1<br/>→ check I/O health"]
+    DS -->|Storage/network| DS3["Check NFS mounts,<br/>RAID status, SAN connectivity"]
 ```
 
 ---
