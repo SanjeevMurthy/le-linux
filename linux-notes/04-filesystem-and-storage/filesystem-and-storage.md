@@ -148,7 +148,7 @@ graph TD
     OFT -->|"f_path.dentry→d_inode"| INO
     INO -->|"extent tree / block map"| DATA
 
-    PROC_B["Process B (forked)<br/>fd[3] → same struct file"]
+    PROC_B[""Process B (forked)<br/>fd[3"] → same struct file"]
     PROC_B -->|"shared after fork()"| OFT
 
     style FDT fill:#e1f5fe

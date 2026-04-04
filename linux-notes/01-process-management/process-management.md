@@ -77,7 +77,7 @@ Every schedulable entity in the Linux kernel is represented by a `task_struct` (
 
 ```mermaid
 graph TD
-    TS["task_struct"] --> ID["Identity<br/>─────────<br/>pid (thread ID)<br/>tgid (process ID)<br/>comm[TASK_COMM_LEN]<br/>real_cred, cred"]
+    TS["task_struct"] --> ID[""Identity<br/>─────────<br/>pid (thread ID)<br/>tgid (process ID)<br/>comm[TASK_COMM_LEN"]<br/>real_cred, cred"]
     TS --> STATE["Scheduling<br/>─────────<br/>__state (TASK_RUNNING, etc.)<br/>prio, static_prio, normal_prio<br/>rt_priority<br/>policy (SCHED_NORMAL, SCHED_FIFO)<br/>cpus_mask"]
     TS --> MM["Memory<br/>─────────<br/>mm (user address space)<br/>active_mm<br/>mm→pgd (page tables)<br/>mm→mmap (VMA list)"]
     TS --> FILES["File Descriptors<br/>─────────<br/>files (files_struct*)<br/>fs (fs_struct*)<br/>nsproxy (namespaces)"]
