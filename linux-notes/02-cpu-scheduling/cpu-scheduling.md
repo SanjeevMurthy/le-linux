@@ -66,6 +66,9 @@
 
 <!-- toc stop -->
 
+<img width="2752" height="1536" alt="image" src="https://github.com/user-attachments/assets/ddeb5ca6-aaaf-474e-a79e-79a3b7ccb2a3" />
+
+
 ## Section 1: Concept (Senior-Level Understanding)
 
 ### What CPU Scheduling Actually Means at Scale
