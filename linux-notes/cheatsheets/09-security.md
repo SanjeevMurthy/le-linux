@@ -5,6 +5,22 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [SELinux Commands](#selinux-commands)
+- [PAM Configuration](#pam-configuration)
+- [File Permissions and ACLs](#file-permissions-and-acls)
+- [Linux Capabilities](#linux-capabilities)
+- [SSH Hardening](#ssh-hardening)
+- [Firewall (iptables / nftables)](#firewall-iptables-nftables)
+- [Audit Framework](#audit-framework)
+- [Kernel Security Parameters (sysctl)](#kernel-security-parameters-sysctl)
+- [CIS Hardening Quick Checks](#cis-hardening-quick-checks)
+- [Incident Response Quick Commands](#incident-response-quick-commands)
+
+<!-- toc stop -->
+
 ## SELinux Commands
 
 ```bash

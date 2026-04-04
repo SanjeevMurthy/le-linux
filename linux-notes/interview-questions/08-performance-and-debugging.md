@@ -5,6 +5,32 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [Q1: Walk me through how you would debug a slow server. What is your systematic methodology?](#q1-walk-me-through-how-you-would-debug-a-slow-server-what-is-your-systematic-methodology)
+- [Q2: Explain the USE method. How does it differ from RED? When would you use each?](#q2-explain-the-use-method-how-does-it-differ-from-red-when-would-you-use-each)
+- [Q3: What is the difference between perf and strace? When would you use each in production?](#q3-what-is-the-difference-between-perf-and-strace-when-would-you-use-each-in-production)
+- [Q4: Explain the eBPF architecture. Why is it safe to run in the production kernel?](#q4-explain-the-ebpf-architecture-why-is-it-safe-to-run-in-the-production-kernel)
+- [Q5: How do you generate and interpret a CPU flame graph?](#q5-how-do-you-generate-and-interpret-a-cpu-flame-graph)
+- [Q6: Explain PSI (Pressure Stall Information). How is it superior to traditional metrics?](#q6-explain-psi-pressure-stall-information-how-is-it-superior-to-traditional-metrics)
+- [Q7: What does %util in iostat actually measure? Why can it be misleading?](#q7-what-does-util-in-iostat-actually-measure-why-can-it-be-misleading)
+- [Q8: How does strace work internally? Why does it cause 100x overhead?](#q8-how-does-strace-work-internally-why-does-it-cause-100x-overhead)
+- [Q9: A server has load average 64 but only 10% CPU utilization. What is happening?](#q9-a-server-has-load-average-64-but-only-10-cpu-utilization-what-is-happening)
+- [Q10: How would you diagnose TCP retransmissions in production?](#q10-how-would-you-diagnose-tcp-retransmissions-in-production)
+- [Q11: Explain the differences between vmstat, mpstat, pidstat, and sar. What is the investigation workflow?](#q11-explain-the-differences-between-vmstat-mpstat-pidstat-and-sar-what-is-the-investigation-workflow)
+- [Q12: How would you debug a process stuck in D (uninterruptible sleep) state?](#q12-how-would-you-debug-a-process-stuck-in-d-uninterruptible-sleep-state)
+- [Q13: What is ftrace? When would you use it instead of perf or eBPF?](#q13-what-is-ftrace-when-would-you-use-it-instead-of-perf-or-ebpf)
+- [Q14: Explain how kdump works. How do you analyze a kernel panic post-mortem?](#q14-explain-how-kdump-works-how-do-you-analyze-a-kernel-panic-post-mortem)
+- [Q15: What are BCC and bpftrace? When do you choose one over the other?](#q15-what-are-bcc-and-bpftrace-when-do-you-choose-one-over-the-other)
+- [Q16: How would you identify and fix network microbursts causing retransmissions?](#q16-how-would-you-identify-and-fix-network-microbursts-causing-retransmissions)
+- [Q17: Explain the I/O schedulers available in modern Linux. How do you choose the right one?](#q17-explain-the-io-schedulers-available-in-modern-linux-how-do-you-choose-the-right-one)
+- [Q18: What is the OOM killer? How does the kernel select which process to kill?](#q18-what-is-the-oom-killer-how-does-the-kernel-select-which-process-to-kill)
+- [Q19: How do you debug a kernel soft lockup? What causes them?](#q19-how-do-you-debug-a-kernel-soft-lockup-what-causes-them)
+- [Q20: A Java application reports 8 GiB RSS but free -m shows 2 GiB available. Is this a problem?](#q20-a-java-application-reports-8-gib-rss-but-free--m-shows-2-gib-available-is-this-a-problem)
+
+<!-- toc stop -->
+
 ## Q1: Walk me through how you would debug a slow server. What is your systematic methodology?
 
 1. **Do not guess -- establish the bottleneck resource first.** Run the 60-second checklist: `uptime`, `dmesg -T | tail`, `vmstat 1`, `mpstat -P ALL 1`, `pidstat 1`, `iostat -xz 1`, `free -m`, `sar -n DEV 1`, `sar -n TCP,ETCP 1`, `top -bn1`

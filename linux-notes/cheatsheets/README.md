@@ -5,6 +5,22 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [Cheatsheet Index](#cheatsheet-index)
+- [The 60-Second Server Debugging Checklist](#the-60-second-server-debugging-checklist)
+- [Most Important Commands (Top 20)](#most-important-commands-top-20)
+- [Quick Links by Scenario](#quick-links-by-scenario)
+  - ["Server is slow"](#server-is-slow)
+  - ["Out of memory"](#out-of-memory)
+  - ["Disk full"](#disk-full)
+  - ["Network issues"](#network-issues)
+  - ["Security incident"](#security-incident)
+- [USE Method Quick Reference](#use-method-quick-reference)
+
+<!-- toc stop -->
+
 ## Cheatsheet Index
 
 | # | Topic | Link |

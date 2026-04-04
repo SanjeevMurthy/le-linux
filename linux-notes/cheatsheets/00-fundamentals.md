@@ -5,6 +5,31 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [Boot Sequence](#boot-sequence)
+- [Key File Paths](#key-file-paths)
+  - [Boot Files](#boot-files)
+  - [/proc Essentials](#proc-essentials)
+  - [/sys Essentials](#sys-essentials)
+- [Essential Commands](#essential-commands)
+  - [Boot Analysis](#boot-analysis)
+  - [Kernel Messages](#kernel-messages)
+  - [Kernel & Module Info](#kernel-module-info)
+  - [System Call Tracing](#system-call-tracing)
+  - [Service Management](#service-management)
+- [Syscall Path Quick Reference (x86_64)](#syscall-path-quick-reference-x86_64)
+  - [vDSO-Accelerated Syscalls (No Kernel Entry)](#vdso-accelerated-syscalls-no-kernel-entry)
+- [GRUB Rescue Quick Reference](#grub-rescue-quick-reference)
+- [Rescue Boot Options (Kernel Command Line)](#rescue-boot-options-kernel-command-line)
+- [initramfs Rebuild](#initramfs-rebuild)
+- [Production Kernel Command Line (Common Additions)](#production-kernel-command-line-common-additions)
+- [Debugging Decision Tree](#debugging-decision-tree)
+- [BIOS vs UEFI Quick Comparison](#bios-vs-uefi-quick-comparison)
+
+<!-- toc stop -->
+
 ## Boot Sequence
 
 ```mermaid

@@ -5,6 +5,34 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [Memory Overview at a Glance](#memory-overview-at-a-glance)
+- [Essential Commands](#essential-commands)
+  - [Quick Health Check](#quick-health-check)
+  - [Detailed Memory Analysis](#detailed-memory-analysis)
+  - [Per-Process Memory](#per-process-memory)
+  - [OOM Management](#oom-management)
+  - [NUMA Analysis](#numa-analysis)
+  - [Slab / Kernel Memory](#slab-kernel-memory)
+  - [Swap Management](#swap-management)
+  - [Fragmentation and Zones](#fragmentation-and-zones)
+  - [Transparent Huge Pages](#transparent-huge-pages)
+  - [Page Cache](#page-cache)
+  - [eBPF Memory Tools (bcc)](#ebpf-memory-tools-bcc)
+- [/proc/meminfo Field Guide](#procmeminfo-field-guide)
+  - [Critical Fields](#critical-fields)
+  - [Memory Calculation Formulas](#memory-calculation-formulas)
+- [Memory Zones Reference](#memory-zones-reference)
+- [OOM Score Explained](#oom-score-explained)
+- [Page Table Hierarchy (x86_64)](#page-table-hierarchy-x86_64)
+- [Critical Sysctl Tunables](#critical-sysctl-tunables)
+- [Emergency Response Playbook](#emergency-response-playbook)
+- [Common Gotchas](#common-gotchas)
+
+<!-- toc stop -->
+
 ## Memory Overview at a Glance
 
 ```mermaid

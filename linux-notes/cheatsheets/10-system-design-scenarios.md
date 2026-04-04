@@ -5,6 +5,23 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [Container Runtime Chain](#container-runtime-chain)
+- [cgroupv2 Management](#cgroupv2-management)
+- [Memory Hierarchy (cgroupv2)](#memory-hierarchy-cgroupv2)
+- [Namespace Operations](#namespace-operations)
+- [Networking for Containers](#networking-for-containers)
+- [Fleet-Wide Operations](#fleet-wide-operations)
+- [Isolation Spectrum](#isolation-spectrum)
+- [SRE Quick Reference](#sre-quick-reference)
+- [Log Pipeline Architecture](#log-pipeline-architecture)
+- [Fleet Kernel Upgrade Checklist](#fleet-kernel-upgrade-checklist)
+- [Critical Gotchas](#critical-gotchas)
+
+<!-- toc stop -->
+
 ## Container Runtime Chain
 
 ```bash

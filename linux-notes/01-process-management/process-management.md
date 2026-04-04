@@ -6,6 +6,61 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [Section 1: Concept (Senior-Level Understanding)](#section-1-concept-senior-level-understanding)
+  - [The Linux Process Model](#the-linux-process-model)
+  - [Trade-offs: Processes vs Threads](#trade-offs-processes-vs-threads)
+  - [Process Hierarchy](#process-hierarchy)
+- [Section 2: Internal Working (Kernel-Level Deep Dive)](#section-2-internal-working-kernel-level-deep-dive)
+  - [2.1 The `task_struct` — Process Descriptor](#21-the-task_struct-process-descriptor)
+  - [2.2 Process States and Transitions](#22-process-states-and-transitions)
+  - [2.3 Process Creation: `fork()` / `clone()` / `exec()` Internals](#23-process-creation-fork-clone-exec-internals)
+  - [2.4 Signals Internals](#24-signals-internals)
+- [Section 3: Commands + Practical Examples](#section-3-commands-practical-examples)
+  - [3.1 Process Inspection](#31-process-inspection)
+  - [3.2 Process Discovery and Signaling](#32-process-discovery-and-signaling)
+  - [3.3 Priority and Scheduling](#33-priority-and-scheduling)
+  - [3.4 `/proc` Filesystem — The Kernel's Window](#34-proc-filesystem-the-kernels-window)
+- [Section 4: Advanced Debugging & Observability](#section-4-advanced-debugging-observability)
+  - [4.1 `strace` — System Call Tracing](#41-strace-system-call-tracing)
+  - [4.2 Other Debugging Tools](#42-other-debugging-tools)
+  - [4.3 Zombie Process Debugging Decision Tree](#43-zombie-process-debugging-decision-tree)
+- [Section 5: Real-World Production Scenarios](#section-5-real-world-production-scenarios)
+  - [Incident 1: Fork Bomb DoS on Shared Compute Cluster](#incident-1-fork-bomb-dos-on-shared-compute-cluster)
+  - [Incident 2: Zombie Process Accumulation from Buggy Daemon](#incident-2-zombie-process-accumulation-from-buggy-daemon)
+  - [Incident 3: PID Namespace Leak in Container Orchestration](#incident-3-pid-namespace-leak-in-container-orchestration)
+  - [Incident 4: SIGKILL Not Working on D-State Process](#incident-4-sigkill-not-working-on-d-state-process)
+  - [Incident 5: Process Stuck in Uninterruptible Sleep Blocking NFS `umount`](#incident-5-process-stuck-in-uninterruptible-sleep-blocking-nfs-umount)
+- [Section 6: Advanced Interview Questions](#section-6-advanced-interview-questions)
+  - [Category A: Conceptual Deep Questions](#category-a-conceptual-deep-questions)
+  - [Category B: Scenario-Based Questions](#category-b-scenario-based-questions)
+  - [Category C: Debugging Questions](#category-c-debugging-questions)
+  - [Category D: Trick Questions](#category-d-trick-questions)
+- [Section 7: Common Pitfalls & Misconceptions](#section-7-common-pitfalls-misconceptions)
+  - [Pitfall 1: Using `kill -9` as the first resort](#pitfall-1-using-kill--9-as-the-first-resort)
+  - [Pitfall 2: Confusing `SIGKILL` failure with a bug](#pitfall-2-confusing-sigkill-failure-with-a-bug)
+  - [Pitfall 3: Believing that zombie processes consume resources](#pitfall-3-believing-that-zombie-processes-consume-resources)
+  - [Pitfall 4: Not understanding the difference between `ps aux` and `ps -ef`](#pitfall-4-not-understanding-the-difference-between-ps-aux-and-ps--ef)
+  - [Pitfall 5: Assuming `kill <PID>` always sends SIGTERM](#pitfall-5-assuming-kill-pid-always-sends-sigterm)
+  - [Pitfall 6: Running fork-heavy workloads without process limits](#pitfall-6-running-fork-heavy-workloads-without-process-limits)
+- [Section 8: Pro Tips (From 15+ Years Experience)](#section-8-pro-tips-from-15-years-experience)
+  - [Tip 1: Always use `tini` or `dumb-init` as PID 1 in containers](#tip-1-always-use-tini-or-dumb-init-as-pid-1-in-containers)
+  - [Tip 2: Prefer `pgrep`/`pkill` over `ps | grep | kill`](#tip-2-prefer-pgreppkill-over-ps-grep-kill)
+  - [Tip 3: Use `process_namespaces` for blast radius control](#tip-3-use-process_namespaces-for-blast-radius-control)
+  - [Tip 4: Monitor process churn, not just process count](#tip-4-monitor-process-churn-not-just-process-count)
+  - [Tip 5: Use `PR_SET_CHILD_SUBREAPER` for service managers](#tip-5-use-pr_set_child_subreaper-for-service-managers)
+  - [Tip 6: Know your `/proc` shortcuts](#tip-6-know-your-proc-shortcuts)
+  - [Tip 7: Understand `SIGSTOP` + `SIGCONT` for live process surgery](#tip-7-understand-sigstop-sigcont-for-live-process-surgery)
+  - [Tip 8: Set process names for debuggability](#tip-8-set-process-names-for-debuggability)
+- [Section 9: Quick Reference Cheatsheet](#section-9-quick-reference-cheatsheet)
+  - [Essential Commands at a Glance](#essential-commands-at-a-glance)
+  - [Process States Quick Reference](#process-states-quick-reference)
+- [Cross-References](#cross-references)
+
+<!-- toc stop -->
+
 ## Section 1: Concept (Senior-Level Understanding)
 
 ### The Linux Process Model

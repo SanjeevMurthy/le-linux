@@ -6,6 +6,56 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [1. Concept (Senior-Level Understanding)](#1-concept-senior-level-understanding)
+  - [SRE Philosophy and Incident Management](#sre-philosophy-and-incident-management)
+  - [SRE Incident Management Overview](#sre-incident-management-overview)
+- [2. Internal Working](#2-internal-working)
+  - [2.1 Incident Response Lifecycle](#21-incident-response-lifecycle)
+  - [2.2 SLI / SLO / SLA Framework](#22-sli-slo-sla-framework)
+  - [2.3 Escalation and Severity Framework](#23-escalation-and-severity-framework)
+- [3. Commands -- Incident Response Arsenal](#3-commands----incident-response-arsenal)
+  - [Immediate Triage (First 5 Minutes)](#immediate-triage-first-5-minutes)
+  - [Deep Investigation Commands](#deep-investigation-commands)
+  - [Recovery and Mitigation Commands](#recovery-and-mitigation-commands)
+- [4. Debugging -- Unified Incident Triage Decision Tree](#4-debugging----unified-incident-triage-decision-tree)
+- [5. Cross-Cutting Incidents](#5-cross-cutting-incidents)
+  - [Incident 1: Cascading OOM Across Microservices](#incident-1-cascading-oom-across-microservices)
+  - [Incident 2: Kernel Live-Patch Failure During Rolling Upgrade](#incident-2-kernel-live-patch-failure-during-rolling-upgrade)
+  - [Incident 3: DNS TTL Caching Causing Stale Endpoints After Failover](#incident-3-dns-ttl-caching-causing-stale-endpoints-after-failover)
+  - [Incident 4: Thundering Herd on Service Restart Exhausting CPU](#incident-4-thundering-herd-on-service-restart-exhausting-cpu)
+  - [Incident 5: Silent Data Corruption from Filesystem Bug](#incident-5-silent-data-corruption-from-filesystem-bug)
+  - [Incident 6: Network Partition Causing Split-Brain in Distributed System](#incident-6-network-partition-causing-split-brain-in-distributed-system)
+  - [Incident 7: Log Volume Explosion Filling Disk and Cascading to OOM](#incident-7-log-volume-explosion-filling-disk-and-cascading-to-oom)
+  - [Incident 8: Container Escape via Kernel Vulnerability](#incident-8-container-escape-via-kernel-vulnerability)
+  - [Incident 9: Clock Skew Causing Distributed System Inconsistency](#incident-9-clock-skew-causing-distributed-system-inconsistency)
+  - [Incident 10: NIC Firmware Bug Causing Intermittent Packet Loss](#incident-10-nic-firmware-bug-causing-intermittent-packet-loss)
+  - [Incident 11: Zombie Process Accumulation Exhausting PID Space (Bonus)](#incident-11-zombie-process-accumulation-exhausting-pid-space-bonus)
+- [6. Interview Questions](#6-interview-questions)
+  - [Behavioral Incident Questions](#behavioral-incident-questions)
+  - [Technical Incident Questions](#technical-incident-questions)
+- [7. Anti-Patterns in Incident Response](#7-anti-patterns-in-incident-response)
+  - [Anti-Pattern 1: The Hero Culture](#anti-pattern-1-the-hero-culture)
+  - [Anti-Pattern 2: Premature Root Cause Analysis During Active Incident](#anti-pattern-2-premature-root-cause-analysis-during-active-incident)
+  - [Anti-Pattern 3: Alert Fatigue Normalization](#anti-pattern-3-alert-fatigue-normalization)
+  - [Anti-Pattern 4: The Blameful Post-Mortem](#anti-pattern-4-the-blameful-post-mortem)
+  - [Anti-Pattern 5: Rollback Phobia](#anti-pattern-5-rollback-phobia)
+  - [Anti-Pattern 6: The Infinite Retry Loop](#anti-pattern-6-the-infinite-retry-loop)
+  - [Anti-Pattern 7: Monitoring the Infrastructure but Not the User Experience](#anti-pattern-7-monitoring-the-infrastructure-but-not-the-user-experience)
+- [8. Pro Tips for On-Call and Incident Management](#8-pro-tips-for-on-call-and-incident-management)
+  - [On-Call Effectiveness](#on-call-effectiveness)
+  - [Post-Mortem Excellence](#post-mortem-excellence)
+  - [Architecture for Resilience](#architecture-for-resilience)
+- [9. Cheatsheet -- Incident Response Runbook Template](#9-cheatsheet----incident-response-runbook-template)
+  - [Incident Response Quick Reference](#incident-response-quick-reference)
+  - [Severity Classification Quick Reference](#severity-classification-quick-reference)
+  - [Key Metrics to Track](#key-metrics-to-track)
+  - [Incident Diagnostic Commands Cheat Sheet](#incident-diagnostic-commands-cheat-sheet)
+
+<!-- toc stop -->
+
 ## 1. Concept (Senior-Level Understanding)
 
 ### SRE Philosophy and Incident Management

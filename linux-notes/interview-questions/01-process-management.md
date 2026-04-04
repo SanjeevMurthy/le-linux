@@ -6,6 +6,35 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [Category A: Conceptual Deep Questions](#category-a-conceptual-deep-questions)
+  - [Q1. Explain the relationship between PID and TGID in the Linux kernel. Why does `getpid()` return TGID?](#q1-explain-the-relationship-between-pid-and-tgid-in-the-linux-kernel-why-does-getpid-return-tgid)
+  - [Q2. What happens to a process's children when the parent dies? Describe the complete orphan handling mechanism.](#q2-what-happens-to-a-processs-children-when-the-parent-dies-describe-the-complete-orphan-handling-mechanism)
+  - [Q3. Explain Copy-on-Write in `fork()`. What are the performance implications for memory-intensive applications?](#q3-explain-copy-on-write-in-fork-what-are-the-performance-implications-for-memory-intensive-applications)
+  - [Q4. Why can `SIGKILL` fail to kill a process? List all scenarios.](#q4-why-can-sigkill-fail-to-kill-a-process-list-all-scenarios)
+  - [Q5. Describe the differences between `TASK_INTERRUPTIBLE`, `TASK_UNINTERRUPTIBLE`, and `TASK_KILLABLE`. Why does each exist?](#q5-describe-the-differences-between-task_interruptible-task_uninterruptible-and-task_killable-why-does-each-exist)
+- [Category B: Scenario-Based Questions](#category-b-scenario-based-questions)
+  - [Q6. You receive an alert that a production server has 5000 zombie processes. Walk through your investigation and remediation.](#q6-you-receive-an-alert-that-a-production-server-has-5000-zombie-processes-walk-through-your-investigation-and-remediation)
+  - [Q7. A container running in Kubernetes cannot spawn new processes (`fork: Resource temporarily unavailable`), but the host has plenty of resources. Diagnose.](#q7-a-container-running-in-kubernetes-cannot-spawn-new-processes-fork-resource-temporarily-unavailable-but-the-host-has-plenty-of-resources-diagnose)
+  - [Q8. Explain what happens step-by-step when you type `ls | grep foo` in bash, from fork to exit.](#q8-explain-what-happens-step-by-step-when-you-type-ls-grep-foo-in-bash-from-fork-to-exit)
+  - [Q9. Your team's Go service is leaking goroutines, and the process has 50,000 threads. What is the system-level impact and how do you investigate?](#q9-your-teams-go-service-is-leaking-goroutines-and-the-process-has-50000-threads-what-is-the-system-level-impact-and-how-do-you-investigate)
+- [Category C: Debugging Questions](#category-c-debugging-questions)
+  - [Q10. How do you determine what a process in `D` state is waiting for?](#q10-how-do-you-determine-what-a-process-in-d-state-is-waiting-for)
+  - [Q11. A process is consuming 100% of a CPU core but no output is being produced. How do you diagnose?](#q11-a-process-is-consuming-100-of-a-cpu-core-but-no-output-is-being-produced-how-do-you-diagnose)
+  - [Q12. After deploying a new kernel, processes randomly receive SIGSEGV. How do you investigate?](#q12-after-deploying-a-new-kernel-processes-randomly-receive-sigsegv-how-do-you-investigate)
+  - [Q13. How do you trace why a process is slow to start?](#q13-how-do-you-trace-why-a-process-is-slow-to-start)
+- [Category D: Trick Questions](#category-d-trick-questions)
+  - [Q14. Can a zombie process be killed with `kill -9`?](#q14-can-a-zombie-process-be-killed-with-kill--9)
+  - [Q15. If `fork()` returns 0, are you in the parent or child? What if it returns -1?](#q15-if-fork-returns-0-are-you-in-the-parent-or-child-what-if-it-returns--1)
+  - [Q16. Is it possible for a process to have PID 0? What about negative PIDs in `kill()`?](#q16-is-it-possible-for-a-process-to-have-pid-0-what-about-negative-pids-in-kill)
+  - [Q17. What is the maximum number of processes a Linux system can run? What are all the limits that apply?](#q17-what-is-the-maximum-number-of-processes-a-linux-system-can-run-what-are-all-the-limits-that-apply)
+  - [Q18. Explain the double-fork technique for creating daemon processes. Why is it no longer recommended?](#q18-explain-the-double-fork-technique-for-creating-daemon-processes-why-is-it-no-longer-recommended)
+- [Scoring Guide](#scoring-guide)
+
+<!-- toc stop -->
+
 ## Category A: Conceptual Deep Questions
 
 ### Q1. Explain the relationship between PID and TGID in the Linux kernel. Why does `getpid()` return TGID?

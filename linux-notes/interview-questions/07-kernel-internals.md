@@ -5,6 +5,32 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [Q1: Explain the difference between insmod and modprobe. Why should you never use insmod in production?](#q1-explain-the-difference-between-insmod-and-modprobe-why-should-you-never-use-insmod-in-production)
+- [Q2: What does it mean for the kernel to be "tainted"? How do you decode the taint flags and why does it matter?](#q2-what-does-it-mean-for-the-kernel-to-be-tainted-how-do-you-decode-the-taint-flags-and-why-does-it-matter)
+- [Q3: Explain cgroups v2 unified hierarchy. How does it differ from v1, and why does Kubernetes require it?](#q3-explain-cgroups-v2-unified-hierarchy-how-does-it-differ-from-v1-and-why-does-kubernetes-require-it)
+- [Q4: How would you set a CPU limit of exactly 2.5 cores using cgroups v2? Walk through every step.](#q4-how-would-you-set-a-cpu-limit-of-exactly-25-cores-using-cgroups-v2-walk-through-every-step)
+- [Q5: List all 8 Linux namespace types and give a production scenario for each.](#q5-list-all-8-linux-namespace-types-and-give-a-production-scenario-for-each)
+- [Q6: Walk through what happens at the kernel level when a container is OOM-killed.](#q6-walk-through-what-happens-at-the-kernel-level-when-a-container-is-oom-killed)
+- [Q7: How do you enter a running container's namespaces without Docker CLI?](#q7-how-do-you-enter-a-running-containers-namespaces-without-docker-cli)
+- [Q8: Explain the "no internal processes" rule in cgroups v2 and its impact on container runtimes.](#q8-explain-the-no-internal-processes-rule-in-cgroups-v2-and-its-impact-on-container-runtimes)
+- [Q9: What is seccomp-BPF and how does Docker's default seccomp profile work?](#q9-what-is-seccomp-bpf-and-how-does-dockers-default-seccomp-profile-work)
+- [Q10: How do you debug a container that cannot reach the network? Walk through each layer.](#q10-how-do-you-debug-a-container-that-cannot-reach-the-network-walk-through-each-layer)
+- [Q11: What are Linux capabilities and why are they critical for container security?](#q11-what-are-linux-capabilities-and-why-are-they-critical-for-container-security)
+- [Q12: Explain cgroup PSI (Pressure Stall Information) and how you would use it for container autoscaling.](#q12-explain-cgroup-psi-pressure-stall-information-and-how-you-would-use-it-for-container-autoscaling)
+- [Q13: A developer wants to run Docker inside Docker. What are the kernel-level implications and what should you recommend?](#q13-a-developer-wants-to-run-docker-inside-docker-what-are-the-kernel-level-implications-and-what-should-you-recommend)
+- [Q14: How does `memory.high` differ from `memory.max` in cgroups v2? When would you use each?](#q14-how-does-memoryhigh-differ-from-memorymax-in-cgroups-v2-when-would-you-use-each)
+- [Q15: Describe how user namespaces enable rootless containers and their security implications.](#q15-describe-how-user-namespaces-enable-rootless-containers-and-their-security-implications)
+- [Q16: Walk through what happens when you run `unshare --pid --fork --mount-proc bash`.](#q16-walk-through-what-happens-when-you-run-unshare---pid---fork---mount-proc-bash)
+- [Q17: How would you investigate and fix a situation where containers on a node suddenly cannot be created due to "cannot allocate memory" errors, but the node has plenty of free RAM?](#q17-how-would-you-investigate-and-fix-a-situation-where-containers-on-a-node-suddenly-cannot-be-created-due-to-cannot-allocate-memory-errors-but-the-node-has-plenty-of-free-ram)
+- [Q18: Explain kernel module signing, Secure Boot integration, and what happens when they conflict.](#q18-explain-kernel-module-signing-secure-boot-integration-and-what-happens-when-they-conflict)
+- [Q19: Compare how Docker, Podman, and LXC use namespaces and cgroups differently.](#q19-compare-how-docker-podman-and-lxc-use-namespaces-and-cgroups-differently)
+- [Q20: A production Kubernetes cluster is being migrated from cgroups v1 to v2. What are the top 5 things that can break?](#q20-a-production-kubernetes-cluster-is-being-migrated-from-cgroups-v1-to-v2-what-are-the-top-5-things-that-can-break)
+
+<!-- toc stop -->
+
 ## Q1: Explain the difference between insmod and modprobe. Why should you never use insmod in production?
 
 - `insmod` directly inserts a single `.ko` file using the `init_module()` syscall

@@ -5,6 +5,30 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [Q1: Walk through the complete lifecycle of a TCP connection, including all state transitions. What happens at each stage in the kernel?](#q1-walk-through-the-complete-lifecycle-of-a-tcp-connection-including-all-state-transitions-what-happens-at-each-stage-in-the-kernel)
+- [Q2: Explain the difference between TIME_WAIT and CLOSE_WAIT. Why is CLOSE_WAIT always an application bug?](#q2-explain-the-difference-between-time_wait-and-close_wait-why-is-close_wait-always-an-application-bug)
+- [Q3: How does Linux handle a SYN flood attack? Explain SYN cookies in detail.](#q3-how-does-linux-handle-a-syn-flood-attack-explain-syn-cookies-in-detail)
+- [Q4: Describe the complete DNS resolution path on a modern Linux system.](#q4-describe-the-complete-dns-resolution-path-on-a-modern-linux-system)
+- [Q5: What is conntrack and why does it matter in production? How do you size and tune it?](#q5-what-is-conntrack-and-why-does-it-matter-in-production-how-do-you-size-and-tune-it)
+- [Q6: What is the difference between iptables and nftables?](#q6-what-is-the-difference-between-iptables-and-nftables)
+- [Q7: How do network namespaces work? How does container networking use them?](#q7-how-do-network-namespaces-work-how-does-container-networking-use-them)
+- [Q8: Explain TCP congestion control. Compare cubic, bbr, and reno.](#q8-explain-tcp-congestion-control-compare-cubic-bbr-and-reno)
+- [Q9: What is Path MTU Discovery and why does it break?](#q9-what-is-path-mtu-discovery-and-why-does-it-break)
+- [Q10: How does `ss` differ from `netstat`? What unique information does it provide?](#q10-how-does-ss-differ-from-netstat-what-unique-information-does-it-provide)
+- [Q11: What happens when a Linux host receives a packet destined for another host?](#q11-what-happens-when-a-linux-host-receives-a-packet-destined-for-another-host)
+- [Q12: How do you diagnose and fix TcpExtListenOverflows?](#q12-how-do-you-diagnose-and-fix-tcpextlistenoverflows)
+- [Q13: Explain ARP's role in packet delivery. What happens with stale entries?](#q13-explain-arps-role-in-packet-delivery-what-happens-with-stale-entries)
+- [Q14: What is TCP Fast Open and when would you use it?](#q14-what-is-tcp-fast-open-and-when-would-you-use-it)
+- [Q15: How do you troubleshoot intermittent packet loss in a cloud environment?](#q15-how-do-you-troubleshoot-intermittent-packet-loss-in-a-cloud-environment)
+- [Q16: What sysctl parameters must every production Linux host tune for networking?](#q16-what-sysctl-parameters-must-every-production-linux-host-tune-for-networking)
+- [Q17: Describe the Netfilter chain traversal for: (a) locally destined, (b) forwarded, and (c) locally generated packets.](#q17-describe-the-netfilter-chain-traversal-for-a-locally-destined-b-forwarded-and-c-locally-generated-packets)
+- [Q18: What causes 5-second DNS timeouts in Kubernetes? How do you fix it?](#q18-what-causes-5-second-dns-timeouts-in-kubernetes-how-do-you-fix-it)
+
+<!-- toc stop -->
+
 ## Q1: Walk through the complete lifecycle of a TCP connection, including all state transitions. What happens at each stage in the kernel?
 
 1. **CLOSED to SYN_SENT (client):** `connect()` triggers kernel to allocate `struct sock`, select ephemeral port from `ip_local_port_range`, construct SYN with randomized ISN, transmit via `tcp_v4_connect()`

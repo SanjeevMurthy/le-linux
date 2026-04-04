@@ -5,6 +5,20 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [Kernel Module Management](#kernel-module-management)
+- [Kernel Tuning (sysctl)](#kernel-tuning-sysctl)
+- [cgroups v2 Operations](#cgroups-v2-operations)
+- [cgroup v2 Key Files Quick Reference](#cgroup-v2-key-files-quick-reference)
+- [Namespace Operations](#namespace-operations)
+- [Namespace Type Reference](#namespace-type-reference)
+- [Container Security Primitives](#container-security-primitives)
+- [Emergency Debugging](#emergency-debugging)
+
+<!-- toc stop -->
+
 ## Kernel Module Management
 
 ```bash

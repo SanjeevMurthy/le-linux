@@ -6,6 +6,37 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [How to Use This File](#how-to-use-this-file)
+- [Category 1: LVM Architecture & Internals](#category-1-lvm-architecture-internals)
+  - [Q1. Explain the LVM abstraction layers. What are PVs, VGs, LVs, and how do PEs/LEs map between them?](#q1-explain-the-lvm-abstraction-layers-what-are-pvs-vgs-lvs-and-how-do-pesles-map-between-them)
+  - [Q2. What role does the Linux device mapper play in LVM? How would you inspect the actual mapping table of an LV?](#q2-what-role-does-the-linux-device-mapper-play-in-lvm-how-would-you-inspect-the-actual-mapping-table-of-an-lv)
+  - [Q3. Compare classic LVM snapshots with thin snapshots. When would you use each?](#q3-compare-classic-lvm-snapshots-with-thin-snapshots-when-would-you-use-each)
+  - [Q4. What happens internally when you run `lvextend -L +50G -r /dev/vg/lv`? Walk through every step.](#q4-what-happens-internally-when-you-run-lvextend--l-50g--r-devvglv-walk-through-every-step)
+- [Category 2: RAID](#category-2-raid)
+  - [Q5. You need to choose a RAID level for a production PostgreSQL server with 8 NVMe drives. Walk through your decision process.](#q5-you-need-to-choose-a-raid-level-for-a-production-postgresql-server-with-8-nvme-drives-walk-through-your-decision-process)
+  - [Q6. Explain the RAID 5 write hole. Why is it dangerous, and what mitigations exist?](#q6-explain-the-raid-5-write-hole-why-is-it-dangerous-and-what-mitigations-exist)
+  - [Q7. What is the practical risk of Unrecoverable Read Errors (URE) during RAID 5 rebuild with modern large disks?](#q7-what-is-the-practical-risk-of-unrecoverable-read-errors-ure-during-raid-5-rebuild-with-modern-large-disks)
+- [Category 3: Partitioning & Disk Management](#category-3-partitioning-disk-management)
+  - [Q8. When would you choose GPT over MBR, and what are the practical implications for server environments?](#q8-when-would-you-choose-gpt-over-mbr-and-what-are-the-practical-implications-for-server-environments)
+  - [Q9. How do you resize a cloud EBS volume attached to a running EC2 instance without downtime? What are the layers involved?](#q9-how-do-you-resize-a-cloud-ebs-volume-attached-to-a-running-ec2-instance-without-downtime-what-are-the-layers-involved)
+- [Category 4: LVM Operations & Troubleshooting](#category-4-lvm-operations-troubleshooting)
+  - [Q10. You arrive on-call and find a production server with every filesystem read-only and applications crashing. The root cause is a full VG. Walk through your emergency response.](#q10-you-arrive-on-call-and-find-a-production-server-with-every-filesystem-read-only-and-applications-crashing-the-root-cause-is-a-full-vg-walk-through-your-emergency-response)
+  - [Q11. How does pvmove work internally? What happens if it is interrupted, and what are the risks?](#q11-how-does-pvmove-work-internally-what-happens-if-it-is-interrupted-and-what-are-the-risks)
+  - [Q12. Explain thin pool overprovisioning. What happens when a thin pool runs out of space?](#q12-explain-thin-pool-overprovisioning-what-happens-when-a-thin-pool-runs-out-of-space)
+- [Category 5: Scenario-Based Questions](#category-5-scenario-based-questions)
+  - [Q13. A developer reports their application is experiencing intermittent I/O errors and the disk usage shows 100% for /data. But `df` shows 80% used. What is happening?](#q13-a-developer-reports-their-application-is-experiencing-intermittent-io-errors-and-the-disk-usage-shows-100-for-data-but-df-shows-80-used-what-is-happening)
+  - [Q14. Your monitoring shows a RAID 10 array with 8 disks has been running in degraded mode for 6 hours, but no alert was triggered. How do you handle this?](#q14-your-monitoring-shows-a-raid-10-array-with-8-disks-has-been-running-in-degraded-mode-for-6-hours-but-no-alert-was-triggered-how-do-you-handle-this)
+  - [Q15. You need to migrate a production server's data from local SATA SSDs to NVMe without any downtime. Describe your approach using LVM.](#q15-you-need-to-migrate-a-production-servers-data-from-local-sata-ssds-to-nvme-without-any-downtime-describe-your-approach-using-lvm)
+  - [Q16. Explain how you would design the storage layout for a high-availability database cluster using LVM and RAID.](#q16-explain-how-you-would-design-the-storage-layout-for-a-high-availability-database-cluster-using-lvm-and-raid)
+  - [Q17. What is the difference between `/dev/mapper/vg-lv`, `/dev/vg/lv`, and `/dev/dm-N`? Which should you use in fstab?](#q17-what-is-the-difference-between-devmappervg-lv-devvglv-and-devdm-n-which-should-you-use-in-fstab)
+  - [Q18. How would you recover an LVM volume group where the metadata on one PV is corrupted but the other PVs are intact?](#q18-how-would-you-recover-an-lvm-volume-group-where-the-metadata-on-one-pv-is-corrupted-but-the-other-pvs-are-intact)
+  - [Q19. What is the Linux device mapper `dm-cache` target, and how would you use it to accelerate a slow HDD-backed volume with an SSD?](#q19-what-is-the-linux-device-mapper-dm-cache-target-and-how-would-you-use-it-to-accelerate-a-slow-hdd-backed-volume-with-an-ssd)
+
+<!-- toc stop -->
+
 ## How to Use This File
 
 - Questions are organized by category and tagged with difficulty level

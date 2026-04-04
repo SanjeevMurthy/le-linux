@@ -6,6 +6,61 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [1. Concept (Senior-Level Understanding)](#1-concept-senior-level-understanding)
+  - [Why LVM Exists: The Abstraction Problem](#why-lvm-exists-the-abstraction-problem)
+  - [LVM Stack Overview](#lvm-stack-overview)
+  - [When to Use LVM (and When Not To)](#when-to-use-lvm-and-when-not-to)
+  - [Partitioning: GPT vs MBR](#partitioning-gpt-vs-mbr)
+- [2. Internal Working (Kernel-Level Deep Dive)](#2-internal-working-kernel-level-deep-dive)
+  - [LVM Layer Stack: From Physical Disk to Filesystem](#lvm-layer-stack-from-physical-disk-to-filesystem)
+  - [Physical Volume (PV) Internals](#physical-volume-pv-internals)
+  - [PE/LE Mapping: How Logical Blocks Become Physical](#pele-mapping-how-logical-blocks-become-physical)
+  - [Device Mapper: The Engine Beneath LVM](#device-mapper-the-engine-beneath-lvm)
+  - [Classic LVM Snapshots vs Thin Snapshots](#classic-lvm-snapshots-vs-thin-snapshots)
+  - [RAID: Levels and Production Trade-offs](#raid-levels-and-production-trade-offs)
+- [3. Commands (Production Recipes)](#3-commands-production-recipes)
+  - [Physical Volume Operations](#physical-volume-operations)
+  - [Volume Group Operations](#volume-group-operations)
+  - [Logical Volume Operations](#logical-volume-operations)
+  - [Partitioning Tools](#partitioning-tools)
+  - [mdadm RAID Operations](#mdadm-raid-operations)
+- [4. Debugging (Production Triage)](#4-debugging-production-triage)
+  - [Disk Space Emergency Triage Flowchart](#disk-space-emergency-triage-flowchart)
+  - [LVM Metadata Corruption Recovery](#lvm-metadata-corruption-recovery)
+  - [RAID Array Debugging](#raid-array-debugging)
+  - [Device Mapper Debugging](#device-mapper-debugging)
+- [5. War Stories (Production Incidents)](#5-war-stories-production-incidents)
+  - [Incident 1: LV Resize Gone Wrong -- Shrinking the Volume Before the Filesystem](#incident-1-lv-resize-gone-wrong----shrinking-the-volume-before-the-filesystem)
+  - [Incident 2: RAID 5 Degradation Unnoticed for Months](#incident-2-raid-5-degradation-unnoticed-for-months)
+  - [Incident 3: LVM Snapshot Filling Up Root VG, Causing System Freeze](#incident-3-lvm-snapshot-filling-up-root-vg-causing-system-freeze)
+  - [Incident 4 (Composite): LVM + Filesystem Corruption from Interrupted pvmove](#incident-4-composite-lvm-filesystem-corruption-from-interrupted-pvmove)
+  - [Incident 5 (Composite): Cloud EBS Volume Detach During Active I/O](#incident-5-composite-cloud-ebs-volume-detach-during-active-io)
+- [6. Interview Questions](#6-interview-questions)
+- [7. Common Pitfalls](#7-common-pitfalls)
+  - [Pitfall 1: Mixing System and Data in the Same VG](#pitfall-1-mixing-system-and-data-in-the-same-vg)
+  - [Pitfall 2: Forgetting That XFS Cannot Shrink](#pitfall-2-forgetting-that-xfs-cannot-shrink)
+  - [Pitfall 3: Running pvmove Across Mismatched Block Sizes](#pitfall-3-running-pvmove-across-mismatched-block-sizes)
+  - [Pitfall 4: Classic Snapshot COW Performance Penalty](#pitfall-4-classic-snapshot-cow-performance-penalty)
+  - [Pitfall 5: Not Monitoring Thin Pool Usage](#pitfall-5-not-monitoring-thin-pool-usage)
+  - [Pitfall 6: RAID Without Monitoring is Worse Than No RAID](#pitfall-6-raid-without-monitoring-is-worse-than-no-raid)
+  - [Pitfall 7: Forgetting partprobe After Partition Table Changes](#pitfall-7-forgetting-partprobe-after-partition-table-changes)
+- [8. Pro Tips](#8-pro-tips)
+  - [Pro Tip 1: lvextend -r Is Your Best Friend](#pro-tip-1-lvextend--r-is-your-best-friend)
+  - [Pro Tip 2: Use lvs Format Strings for Monitoring Scripts](#pro-tip-2-use-lvs-format-strings-for-monitoring-scripts)
+  - [Pro Tip 3: Pre-stage VG Free Space Alerts](#pro-tip-3-pre-stage-vg-free-space-alerts)
+  - [Pro Tip 4: Use vgcfgbackup Before Any Destructive Operation](#pro-tip-4-use-vgcfgbackup-before-any-destructive-operation)
+  - [Pro Tip 5: RAID Scrub Scheduling](#pro-tip-5-raid-scrub-scheduling)
+  - [Pro Tip 6: Cloud Volume Resize Without Reboot](#pro-tip-6-cloud-volume-resize-without-reboot)
+  - [Pro Tip 7: dmsetup for Emergency Debugging](#pro-tip-7-dmsetup-for-emergency-debugging)
+- [9. Cheatsheet](#9-cheatsheet)
+  - [Quick Reference: The LVM Resize Decision Matrix](#quick-reference-the-lvm-resize-decision-matrix)
+  - [Command Prefix Quick Guide](#command-prefix-quick-guide)
+
+<!-- toc stop -->
+
 ## 1. Concept (Senior-Level Understanding)
 
 ### Why LVM Exists: The Abstraction Problem

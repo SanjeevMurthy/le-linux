@@ -5,6 +5,29 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [Process Inspection Commands](#process-inspection-commands)
+- [Process Control Commands](#process-control-commands)
+- [Priority & Scheduling](#priority-scheduling)
+- [Signals Reference](#signals-reference)
+- [Process States](#process-states)
+- [`/proc/<PID>/` Quick Reference](#procpid-quick-reference)
+- [System-Wide `/proc` Paths](#system-wide-proc-paths)
+- [Debugging Toolkit](#debugging-toolkit)
+  - [Trace and Profile](#trace-and-profile)
+  - [Quick Diagnostics](#quick-diagnostics)
+- [Common SRE Runbooks](#common-sre-runbooks)
+  - [Zombie Cleanup](#zombie-cleanup)
+  - [D-State Process Investigation](#d-state-process-investigation)
+  - [Fork Bomb Recovery](#fork-bomb-recovery)
+- [Key Kernel Data Structures](#key-kernel-data-structures)
+  - [PID vs TGID](#pid-vs-tgid)
+- [`clone()` Flags Reference](#clone-flags-reference)
+
+<!-- toc stop -->
+
 ## Process Inspection Commands
 
 | Command | Purpose | When to Use |

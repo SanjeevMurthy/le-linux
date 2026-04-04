@@ -6,6 +6,37 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [How to Use This File](#how-to-use-this-file)
+- [Category 1: Conceptual Deep Questions](#category-1-conceptual-deep-questions)
+  - [Q1. Explain the Linux VFS layer. What problem does it solve and what are its four core objects?](#q1-explain-the-linux-vfs-layer-what-problem-does-it-solve-and-what-are-its-four-core-objects)
+  - [Q2. What is the difference between a hard link and a symbolic link at the inode level?](#q2-what-is-the-difference-between-a-hard-link-and-a-symbolic-link-at-the-inode-level)
+  - [Q3. Explain the three ext4 journaling data modes and when you would use each.](#q3-explain-the-three-ext4-journaling-data-modes-and-when-you-would-use-each)
+  - [Q4. Describe the three-table relationship between file descriptors, open file descriptions, and inodes. What happens during fork() and dup()?](#q4-describe-the-three-table-relationship-between-file-descriptors-open-file-descriptions-and-inodes-what-happens-during-fork-and-dup)
+  - [Q5. Compare ext4 and XFS for a database server workload with 10+ TB of data. Justify your choice.](#q5-compare-ext4-and-xfs-for-a-database-server-workload-with-10-tb-of-data-justify-your-choice)
+  - [Q6. What are the four multi-queue I/O schedulers in modern Linux? When do you use each?](#q6-what-are-the-four-multi-queue-io-schedulers-in-modern-linux-when-do-you-use-each)
+- [Category 2: Scenario-Based Debugging](#category-2-scenario-based-debugging)
+  - [Q7. `df` shows disk is 100% full but `du` reports only 60% used. Walk through your investigation.](#q7-df-shows-disk-is-100-full-but-du-reports-only-60-used-walk-through-your-investigation)
+  - [Q8. A Kubernetes node reports "No space left on device" but df -h shows 45% disk free. What is wrong?](#q8-a-kubernetes-node-reports-no-space-left-on-device-but-df--h-shows-45-disk-free-what-is-wrong)
+  - [Q9. After a power outage, an ext4 filesystem shows errors and remounts read-only. Walk through recovery.](#q9-after-a-power-outage-an-ext4-filesystem-shows-errors-and-remounts-read-only-walk-through-recovery)
+  - [Q10. A MySQL database on NVMe shows P99 latency 5x higher than P50 despite low average I/O utilization. Diagnose.](#q10-a-mysql-database-on-nvme-shows-p99-latency-5x-higher-than-p50-despite-low-average-io-utilization-diagnose)
+  - [Q11. A web server is showing "Too many open files" errors. How do you diagnose and fix this?](#q11-a-web-server-is-showing-too-many-open-files-errors-how-do-you-diagnose-and-fix-this)
+- [Category 3: Architecture & Design](#category-3-architecture-design)
+  - [Q12. You are designing storage for a microservices platform on Kubernetes. How do you choose the filesystem for node root disks and persistent volumes?](#q12-you-are-designing-storage-for-a-microservices-platform-on-kubernetes-how-do-you-choose-the-filesystem-for-node-root-disks-and-persistent-volumes)
+  - [Q13. Explain the complete I/O path from a userspace write() to data persisting on an NVMe SSD.](#q13-explain-the-complete-io-path-from-a-userspace-write-to-data-persisting-on-an-nvme-ssd)
+  - [Q14. When would you choose Btrfs or ZFS over ext4/XFS in production, and what are the risks?](#q14-when-would-you-choose-btrfs-or-zfs-over-ext4xfs-in-production-and-what-are-the-risks)
+- [Category 4: Quick-Fire / Trivia](#category-4-quick-fire-trivia)
+  - [Q15. What does /proc/diskstats contain and how does iostat derive its metrics?](#q15-what-does-procdiskstats-contain-and-how-does-iostat-derive-its-metrics)
+  - [Q16. What is the difference between sync, fsync(), and fdatasync()?](#q16-what-is-the-difference-between-sync-fsync-and-fdatasync)
+  - [Q17. What is the maximum number of hard links per file on ext4? On XFS?](#q17-what-is-the-maximum-number-of-hard-links-per-file-on-ext4-on-xfs)
+  - [Q18. How do you recover space from a 20 GiB log file that was deleted while Nginx still has it open?](#q18-how-do-you-recover-space-from-a-20-gib-log-file-that-was-deleted-while-nginx-still-has-it-open)
+  - [Q19. Explain the ext4 extent tree. Why is it better than the traditional indirect block mapping?](#q19-explain-the-ext4-extent-tree-why-is-it-better-than-the-traditional-indirect-block-mapping)
+  - [Q20. What kernel tunables control dirty page writeback, and how would you tune them for a database server?](#q20-what-kernel-tunables-control-dirty-page-writeback-and-how-would-you-tune-them-for-a-database-server)
+
+<!-- toc stop -->
+
 ## How to Use This File
 
 - Questions are organized by category and tagged with difficulty level

@@ -5,6 +5,30 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [LVM Overview at a Glance](#lvm-overview-at-a-glance)
+- [Essential Commands](#essential-commands)
+  - [Quick Health Check](#quick-health-check)
+  - [LV Resize (Most Common Production Operation)](#lv-resize-most-common-production-operation)
+  - [Adding a New Disk to Existing VG](#adding-a-new-disk-to-existing-vg)
+  - [Online Data Migration (pvmove)](#online-data-migration-pvmove)
+  - [Snapshot Operations](#snapshot-operations)
+  - [RAID (mdadm)](#raid-mdadm)
+- [Emergency Procedures](#emergency-procedures)
+  - [VG Full -- Cannot Write to Any LV](#vg-full----cannot-write-to-any-lv)
+  - [LVM Metadata Corruption](#lvm-metadata-corruption)
+  - [RAID Degraded -- Disk Failed](#raid-degraded----disk-failed)
+- [Cloud Volume Resize (AWS EBS, No Reboot)](#cloud-volume-resize-aws-ebs-no-reboot)
+- [Key Decision Tables](#key-decision-tables)
+  - [Filesystem Resize Support](#filesystem-resize-support)
+  - [RAID Level Selection](#raid-level-selection)
+  - [LVM vs Direct Partition](#lvm-vs-direct-partition)
+- [Critical One-Liners](#critical-one-liners)
+
+<!-- toc stop -->
+
 ## LVM Overview at a Glance
 
 ```mermaid

@@ -5,6 +5,32 @@
 
 ---
 
+<!-- toc -->
+## Table of Contents
+
+- [Q1: Describe a time you led incident response for a P1 outage. What was your decision-making process?](#q1-describe-a-time-you-led-incident-response-for-a-p1-outage-what-was-your-decision-making-process)
+- [Q2: How do you conduct a blameless post-mortem? What makes a post-mortem effective?](#q2-how-do-you-conduct-a-blameless-post-mortem-what-makes-a-post-mortem-effective)
+- [Q3: How do you decide between mitigating immediately vs. investigating root cause during an incident?](#q3-how-do-you-decide-between-mitigating-immediately-vs-investigating-root-cause-during-an-incident)
+- [Q4: Walk through how you would diagnose a cascading OOM failure across a microservice fleet.](#q4-walk-through-how-you-would-diagnose-a-cascading-oom-failure-across-a-microservice-fleet)
+- [Q5: A host has high load average but low CPU utilization. What is happening and how do you investigate?](#q5-a-host-has-high-load-average-but-low-cpu-utilization-what-is-happening-and-how-do-you-investigate)
+- [Q6: Explain SLI, SLO, SLA, and error budgets. How do they work together?](#q6-explain-sli-slo-sla-and-error-budgets-how-do-they-work-together)
+- [Q7: How does the Linux OOM killer decide which process to kill? How would you influence it?](#q7-how-does-the-linux-oom-killer-decide-which-process-to-kill-how-would-you-influence-it)
+- [Q8: Explain how you would design SLIs and SLOs for a payment processing service.](#q8-explain-how-you-would-design-slis-and-slos-for-a-payment-processing-service)
+- [Q9: You discover 0.01% of reads from your storage cluster return corrupted data. Walk through your investigation.](#q9-you-discover-001-of-reads-from-your-storage-cluster-return-corrupted-data-walk-through-your-investigation)
+- [Q10: Explain MTTD, MTTM, MTTR, and MTBF. Which matters most for SRE?](#q10-explain-mttd-mttm-mttr-and-mtbf-which-matters-most-for-sre)
+- [Q11: How would you implement a circuit breaker pattern to prevent cascading failures?](#q11-how-would-you-implement-a-circuit-breaker-pattern-to-prevent-cascading-failures)
+- [Q12: A distributed trace shows a 2-second service call, but downstream logs show 5ms response. Where is the 1,995ms?](#q12-a-distributed-trace-shows-a-2-second-service-call-but-downstream-logs-show-5ms-response-where-is-the-1995ms)
+- [Q13: How do you differentiate between a slow network and a slow application?](#q13-how-do-you-differentiate-between-a-slow-network-and-a-slow-application)
+- [Q14: Your Kubernetes cluster is healthy but pods are stuck in Pending. What do you investigate?](#q14-your-kubernetes-cluster-is-healthy-but-pods-are-stuck-in-pending-what-do-you-investigate)
+- [Q15: Describe your approach to reducing toil on an SRE team.](#q15-describe-your-approach-to-reducing-toil-on-an-sre-team)
+- [Q16: How would you handle a post-mortem where the root cause was a colleague's mistake?](#q16-how-would-you-handle-a-post-mortem-where-the-root-cause-was-a-colleagues-mistake)
+- [Q17: Explain the thundering herd problem. How do you prevent it in production?](#q17-explain-the-thundering-herd-problem-how-do-you-prevent-it-in-production)
+- [Q18: A network partition isolates part of your distributed system. How do you handle split-brain risk?](#q18-a-network-partition-isolates-part-of-your-distributed-system-how-do-you-handle-split-brain-risk)
+- [Q19: How do you protect against silent data corruption in a storage system?](#q19-how-do-you-protect-against-silent-data-corruption-in-a-storage-system)
+- [Q20: Describe how DNS failures can cascade into application outages and how to make DNS resilient.](#q20-describe-how-dns-failures-can-cascade-into-application-outages-and-how-to-make-dns-resilient)
+
+<!-- toc stop -->
+
 ## Q1: Describe a time you led incident response for a P1 outage. What was your decision-making process?
 
 - **Use the STAR framework:**
