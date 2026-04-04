@@ -49,6 +49,8 @@
 
 <!-- toc stop -->
 
+<img width="2752" height="1536" alt="image" src="https://github.com/user-attachments/assets/6c6a999b-b11f-47c9-90e6-444ca3d610b7" />
+
 ## 1. Concept (Senior-Level Understanding)
 
 ### The Linux Memory Model: Virtual Memory and Demand Paging
