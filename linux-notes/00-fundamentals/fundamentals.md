@@ -1113,12 +1113,16 @@ flowchart TD
     BP -->|systemd hangs| BP3["Add systemd.unit=rescue.target\n→ debug from shell"]
     BP -->|Service fails| BP4["systemctl status unit\n+ journalctl -u unit"]
     BP -->|Boot slow| BP5["systemd-analyze blame\n+ critical-chain\n→ disable/optimize units"]
-
+```
+```mermaid
+flowchart TD
     KP{"Kernel panic?"}
     KP -->|kdump available| KP1["Check /var/crash/\n→ crash utility for analysis"]
     KP -->|Rollback| KP2["Boot previous kernel\nfrom GRUB menu"]
     KP -->|Suspect module| KP3["Blacklist module:\nmodprobe.blacklist=module"]
-
+```
+```mermaid
+flowchart TD
     DS{"Process stuck\nin D-state?"}
     DS -->|Stack trace| DS1["cat /proc/PID/stack\n→ identify blocked kernel function"]
     DS -->|I/O health| DS2["iostat -x 1\n→ check I/O health"]
@@ -1126,5 +1130,8 @@ flowchart TD
 ```
 
 ---
+
+<img width="2752" height="1536" alt="image" src="https://github.com/user-attachments/assets/2962853d-e96b-4c3f-ad7c-400e0cb459f4" />
+
 
 > **Next topic:** [Process Management](../01-process-management/process-management.md) -- fork/exec, signals, zombie processes, namespaces, cgroups
