@@ -77,6 +77,9 @@
 
 <!-- toc stop -->
 
+<img width="2752" height="1536" alt="image" src="https://github.com/user-attachments/assets/7311fe8d-c95c-4748-aec4-d3560a6e5be0" />
+
+
 ## 1. Concept (Senior-Level Understanding)
 
 ### The Linux Networking Stack: Architecture and Design Philosophy
