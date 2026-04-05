@@ -825,6 +825,29 @@ graph TD
     style PORTAL fill:#1a5276,color:#fff
 ```
 
+<img width="2021" height="1490" alt="image" src="https://github.com/user-attachments/assets/7b8187f4-fdca-4918-9390-087d668ae4c6" />
+
+This architecture details a robust **multi-tenant compute platform**, heavily inspired by Kubernetes design patterns, that solves the classic "noisy neighbor" problem. When 200 teams share 2,000 hosts, you cannot rely on application-level logic to share resources fairly; you must enforce it at the operating system kernel level.
+
+Here is a breakdown of how this architecture meets your scenario's strict requirements for isolation, burst capability, and security:
+
+### 1. Tenant Management & Scheduling (The Control Plane)
+Before a workload ever reaches a server, the platform must ensure the cluster isn't overbooked.
+* **Tenant Portal & Quota Controller:** This is where the 200 teams interact with the platform. The Quota Controller acts as the bank manager. It ensures that a team cannot request more CPU or memory than their department paid for (their quota). It establishes the baseline for "fair sharing" across the entire 2,000-host fleet.
+* **Resource Aware Scheduler:** When a workload is approved, this component acts as the dispatcher. It looks at the current resource utilization across all 2,000 hosts and places the workload on a host that has enough spare capacity to honor the tenant's requested resource guarantees.
+
+### 2. The Isolation Stack (The Logical Boundaries)
+Once the scheduler assigns a workload to a specific host, the local agent configures logical boundaries.
+* **Kubernetes Namespace:** This provides a virtual cluster for each tenant. It scopes resources so Team A cannot even see the pods, secrets, or services belonging to Team B.
+* **Network Policy & Security Boundary:** These satisfy your security requirement. Network Policies act as a distributed firewall, dropping all cross-tenant traffic by default. Security boundaries restrict the workload's privileges (e.g., preventing a container from running as the root user). 
+
+### 3. Kernel Enforcement (The Physical Boundaries)
+This is the most critical layer for performance isolation. Logical boundaries are useless if one tenant's infinite loop consumes 100% of the host's CPU. The architecture maps the logical "Cgroup Slices" down to fundamental Linux kernel features:
+* **CFS Scheduler (Completely Fair Scheduler):** This handles CPU time. It allows you to set a **"weight" (guarantee)** and a **"limit" (ceiling)**. This satisfies your burst requirement. If the host is mostly idle, Tenant A can "burst" up to their ceiling. But if Tenant B suddenly needs their guaranteed CPU time, the CFS Scheduler immediately throttles Tenant A back down to their baseline, ensuring fair sharing.
+* **Memory Controller:** Enforces hard RAM limits. If a tenant's application has a memory leak and exceeds its boundary, the kernel's OOM (Out of Memory) killer will terminate that specific process before it starves the rest of the host.
+* **IO Controller:** Prevents disk contention. If Tenant A is heavily reading/writing to the disk, the IO controller throttles their throughput to ensure Tenant B's database queries aren't delayed by hardware bottlenecks.
+* **Network Namespaces & eBPF:** Translates the logical Network Policies into low-level packet filtering rules right at the network interface, ensuring strict traffic isolation with very low overhead.
+
 **Linux-specific decisions:**
 
 1. **cgroupv2 hierarchical resource control:**
