@@ -438,6 +438,8 @@ graph LR
     ES --> GRAF
 ```
 
+<img width="1998" height="1176" alt="image" src="https://github.com/user-attachments/assets/e1c2d6a9-a882-4808-9e67-90bb0a9b1de2" />
+
 **Linux-specific decisions:**
 1. **journald as universal collector** -- Fluent Bit reads via `systemd` input plugin with cursor tracking (exactly-once).
 2. **Fluent Bit over Fluentd** -- C-based, ~10 MB RSS vs ~60 MB (Ruby). At 50K hosts, saves ~2.5 TB fleet-wide agent memory.
