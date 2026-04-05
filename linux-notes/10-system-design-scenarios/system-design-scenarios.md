@@ -519,7 +519,29 @@ graph TD
     style CA fill:#1a5276,color:#fff
 ```
 
-<img width="2549" height="1178" alt="image" src="https://github.com/user-attachments/assets/878eccf0-1b90-413d-8a7a-c64e9eeb217d" />
+<img width="2551" height="1202" alt="image" src="https://github.com/user-attachments/assets/71f36169-8480-4a4f-b3c9-76307a0e6bda" />
+
+This diagram illustrates a complete, multi-dimensional **Kubernetes Autoscaling Architecture**. It shows how a cluster dynamically adjusts its capacity at both the application (Pod) level and the infrastructure (Node) level based on real-time demand. 
+
+Mastering this interplay between metrics, pod scaling, and node provisioning is a core system design concept and foundational knowledge for advanced cluster management (and certifications like the CKA).
+
+Here is the breakdown of how these components interact:
+
+### 1. The Metrics Pipeline (The Observers)
+Before the cluster can scale, it needs to know what's happening. 
+* **Application Layer:** Your microservice pods expose telemetry data (like requests per second or queue length).
+* **Prometheus & Prometheus Adapter:** Prometheus scrapes these metrics at a regular interval (every 15s). Because Kubernetes doesn't natively understand Prometheus metrics, the **Prometheus Adapter** translates them into a format the Kubernetes API can read (Custom Metrics). 
+
+### 2. Pod-Level Autoscaling (The Decision Makers)
+Once the cluster has the metrics, it uses two distinct controllers to adjust the application footprint:
+* **Horizontal Pod Autoscaler (HPA):** This reads the custom metrics and scales *out* or *in*. If traffic spikes, HPA increases the number of Pod replicas.
+* **Vertical Pod Autoscaler (VPA):** Instead of adding more pods, the VPA scales *up* or *down*. It observes the actual CPU and memory usage of your pods and resizes their resource `requests` and `limits` so they have exactly what they need without wasting capacity. *(Note: Typically, you avoid running HPA and VPA on the exact same metrics to prevent them from fighting each other).*
+
+### 3. Cluster-Level Autoscaling (The Infrastructure Builders)
+The HPA can request as many new pods as it wants, but if the underlying physical or virtual servers (Nodes) are full, those pods have nowhere to go.
+* **Cluster Autoscaler (CA):** The CA watches for pods that are stuck in a **"pending"** state because of insufficient CPU or memory on existing nodes.
+* **Node Provisioning:** When the CA sees pending pods, it signals the **Cloud API** (e.g., AWS EC2, GCP Compute Engine) to launch a new Virtual Machine. 
+* Once the VM boots, the **Kubelet** process starts, registers the new node as "Ready" with the cluster, and the pending pods are finally scheduled and run.
 
 
 **Linux-specific decisions:**
