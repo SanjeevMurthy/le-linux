@@ -604,6 +604,38 @@ graph TD
     style API fill:#1a5276,color:#fff
 ```
 
+<img width="3841" height="1170" alt="image" src="https://github.com/user-attachments/assets/e0abf506-9d3c-400b-80c4-6ec19602d2da" />
+
+This diagram outlines a custom container orchestration engine built directly on top of fundamental Linux kernel features. Stripping away the abstraction of modern, off-the-shelf orchestrators and designing the system from first principles is one of the most effective ways to master system design and fully grasp the mechanics of workload scheduling.
+
+To meet the requirements of running 5,000 workloads across 500 hosts with rolling deployments and strict isolation, this architecture divides responsibilities into a centralized brain, a distributed worker agent, and the underlying OS kernel.
+
+Here is a breakdown of how this custom platform functions:
+
+### 1. The Control Plane (The Global State)
+This tier is responsible for cluster-wide decisions, maintaining the declarative state, and orchestrating rollouts.
+
+* **Platform API Server:** The central entry point. Engineers submit the desired state here (e.g., "Deploy 10 instances of Service A, version 2.0"). This component typically persists data in a highly available key-value store (like etcd or Consul) to maintain state across the 500 hosts.
+* **Scheduler:** Responsible for the bin-packing algorithm. When the API Server registers a new job, the Scheduler evaluates the fleet of 500 hosts, filtering out those lacking sufficient CPU/Memory, and ranks the remaining nodes to find the optimal placement for the workload. 
+* **Controller:** The engine of the **reconciliation loop**. It constantly compares the *desired* state (in the API Server) with the *actual* state reported by the nodes. 
+    * *Rolling Deployments & Rollbacks:* To satisfy the scenario requirement, the Controller manages the rollout logic. It instructs the API to scale up version `v2` on new nodes while gracefully terminating `v1` workloads, pausing or reversing the process if health checks fail.
+
+### 2. The Node Agent Layer (The Local Manager)
+Running on every single one of the 500 hosts, this daemon translates the Controller's declarative instructions into imperative actions. If you are familiar with Kubernetes architecture, this is essentially a custom-built `kubelet`.
+
+* **Node Agent:** Receives the allocation instructions. It is responsible for executing local health checks on the running processes and reporting node capacity and workload status back to the Control Plane.
+* **OCI Runtime (e.g., runc, crun):** The Node Agent delegates the actual creation and lifecycle management of the container to an Open Container Initiative (OCI) compliant runtime. 
+* **CNI Plugin (Container Network Interface):** Handles the scenario's cross-host network connectivity requirement. The Node Agent calls the CNI plugin to attach the newly created container to an overlay network (e.g., VXLAN or BGP routing), ensuring it gets an IP address capable of reaching containers on the other 499 hosts.
+
+### 3. Linux Primitives (The Engine)
+Containers are not physical constructs; they are just Linux processes wrapped in specialized kernel features. The OCI Runtime interacts directly with these primitives to satisfy the isolation and resource requirements:
+
+* **Namespaces:** Provide *isolation*. They trick the process into thinking it has its own dedicated operating system. The OCI runtime configures PID namespaces (hiding other processes), Mount namespaces (isolating the filesystem), and Network namespaces (providing an isolated network stack).
+* **Cgroups v2 (Control Groups):** Provide *resource limits*. This satisfies the scenario's requirement to prevent noisy neighbors. Cgroups ensure that a specific workload cannot consume more CPU cycles or memory than the Scheduler allocated to it.
+* **Overlay Filesystem:** Allows multiple containers to share the same underlying base image (read-only) while giving each container its own writable top layer, massively saving disk space across the fleet.
+* **Seccomp BPF:** Acts as a security boundary by filtering the system calls the containerized process is allowed to make to the Linux kernel, preventing privilege escalation.
+
+
 **Linux-specific decisions:**
 1. **Container lifecycle without Docker/containerd:**
    - Pull image: HTTP GET from OCI registry, untar layers into content-addressable store
