@@ -519,6 +519,9 @@ graph TD
     style CA fill:#1a5276,color:#fff
 ```
 
+<img width="2549" height="1178" alt="image" src="https://github.com/user-attachments/assets/878eccf0-1b90-413d-8a7a-c64e9eeb217d" />
+
+
 **Linux-specific decisions:**
 1. **cgroupv2 memory.high for graceful degradation** -- VPA sets `memory.high` (soft limit) below `memory.max` (hard limit). When a pod exceeds `memory.high`, the kernel throttles allocation and triggers reclaim rather than OOM-killing. This gives the application time to adapt.
 2. **CPU bandwidth control** -- HPA scales pod replicas, but each pod's CPU is bounded by `cpu.max` in cgroupv2. Setting `cpu.max` to `200000 100000` gives 2 CPUs. CFS bandwidth throttling (`nr_throttled` in `cpu.stat`) is an SLI for "pod needs more CPU."
