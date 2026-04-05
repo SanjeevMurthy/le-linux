@@ -734,6 +734,26 @@ graph TD
     style UNCORDON fill:#2d6a2d,color:#fff
 ```
 
+<img width="2700" height="1318" alt="image" src="https://github.com/user-attachments/assets/85469812-edc5-496c-b985-8cff87a130f4" />
+
+This architecture represents a highly mature, site reliability engineering approach to infrastructure lifecycle management. Upgrading the kernel across a massive, heterogeneous fleet without dropping user traffic requires a delicate balance of aggressive automation, strict blast radius control, and deep OS-level optimizations. 
+
+Here is a breakdown of how this pipeline functions and how it specifically satisfies your scenario's demanding requirements.
+
+### 1. The Global Rollout Strategy (Blast Radius Mitigation)
+Upgrading 50,000 nodes requires an exponential rollout strategy to catch edge-case regressions before they become fleet-wide outages.
+
+* **Build Phase:** The new 6.6 LTS kernel is compiled, passed through automated test suites, and baked into an immutable OS image.
+* **Canary Phase:** The new image is deployed to a tiny, highly monitored control group (e.g., 50 hosts). The system pauses here to monitor core Service Level Indicators (SLIs) like error rates, latency, and system load. If an anomaly is detected, the pipeline automatically halts and triggers a rollback.
+* **Staged Rollout (1% → 10% → 50% → 100%):** Once the canary survives, the pipeline accelerates. Moving from 5.15 to 6.6 is a major jump; this phased approach ensures that rare kernel bugs affecting specific hardware profiles or niche workloads are caught early. To hit the 14-day deadline, the initial stages run for a few days to bake, while the final 50% stage can execute rapidly across tens of thousands of nodes in parallel.
+
+### 2. Per-Host Execution (Zero Downtime & Fast Recovery)
+The bottom layer of the diagram dictates what actually happens on individual servers, which is critical for meeting the "zero downtime" and "5-minute rollback" constraints.
+
+* **Drain Workloads:** To achieve zero user-facing downtime, the nodes must be gracefully emptied before the upgrade begins. In a containerized environment, the node is cordoned (marked as unschedulable), and running pods are evicted. The cluster's scheduler seamlessly spins up replacement pods on other healthy nodes in the fleet before the target node goes offline. 
+* **Load New Kernel & Execute Kexec:** This is the most critical technical mechanism in the diagram. A standard server reboot requires going through the hardware BIOS/UEFI POST sequence, which can take 5 to 15 minutes on large enterprise servers. **Kexec (Kernel Execution)** is a Linux feature that allows you to boot a new kernel directly from the currently running one, entirely bypassing the hardware initialization. This reduces reboot times from minutes to mere seconds. 
+* **Post-Boot Verification & Uncordon:** Once the node is back up on the 6.6 kernel, a local daemon verifies system health. If it passes, the node is uncordoned and allowed to accept new scheduled workloads. If it fails (e.g., network drivers don't load), the fast Kexec mechanism is used to immediately pivot back to the known-good 5.15 kernel, easily satisfying the <5 minute rollback SLA.
+
 **Linux-specific decisions:**
 1. **kexec for fast reboot** -- `kexec` loads the new kernel into memory and jumps directly to it, bypassing BIOS/UEFI POST and bootloader. Reduces reboot time from 3-5 minutes to 15-30 seconds. Critical for meeting zero-downtime SLOs when draining 50,000 hosts.
    ```bash
