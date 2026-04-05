@@ -440,6 +440,25 @@ graph LR
 
 <img width="1998" height="1176" alt="image" src="https://github.com/user-attachments/assets/e1c2d6a9-a882-4808-9e67-90bb0a9b1de2" />
 
+### 1. Hosts & Edge Collection (The Source)
+* **Hosts:** This is where your applications and services run. They generate raw data, such as standard **Application Logs** and system-level **Journald Logs**.
+* **Edge Collection (Fluent Bit Agent):** Instead of having the applications send logs directly over the network, a lightweight agent like Fluent Bit sits on the edge (often as a DaemonSet in container orchestration environments). Its primary job is to quickly tail files, collect the logs, and forward them out of the host with minimal CPU and memory overhead.
+
+### 2. Aggregation Tier (Processing & Routing)
+* **Vector or Fluentd:** The edge agents send data over TCP or TLS to this heavier aggregation tier. Tools like Vector or Fluentd act as the central processing hub. They parse the raw text into structured JSON, filter out noise/debug logs to save storage costs, enrich the logs with metadata (like IP addresses or container IDs), and route them to the next destination.
+
+### 3. Ingest Tier (The Buffer)
+* **Kafka Cluster:** This is a critical component for system reliability. Aggregators act as "Kafka producers," sending the structured logs into a Kafka topic. Kafka serves as a highly durable, high-throughput message queue. 
+    * **Why it's here:** If there is a sudden spike in log traffic, or if the storage layer goes down for maintenance, Kafka buffers the data. It prevents the edge and aggregation layers from crashing under backpressure and ensures no logs are lost.
+
+### 4. Storage Layer (Tiered Retention)
+Logs are pulled from Kafka into the storage layer, which is split into two paths for cost optimization:
+* **Elasticsearch (Hot/Warm Data):** Highly indexed, fast storage used for recent logs that need to be searched or alerted on immediately. It's computationally expensive, so data usually only stays here for a short retention period (e.g., 7 to 30 days).
+* **Object Storage (Cold Archive):** Cheap, highly durable storage (like AWS S3 or GCS) used for long-term retention and compliance. If you need to investigate an incident from six months ago, you would rehydrate data from here.
+
+### 5. Query and Alerting (The Interface)
+* **Grafana or Kibana:** This is the visualization layer. Engineers and operators use these dashboards to query the hot/warm data in Elasticsearch, set up alerts for error spikes, and troubleshoot live system issues.
+
 **Linux-specific decisions:**
 1. **journald as universal collector** -- Fluent Bit reads via `systemd` input plugin with cursor tracking (exactly-once).
 2. **Fluent Bit over Fluentd** -- C-based, ~10 MB RSS vs ~60 MB (Ruby). At 50K hosts, saves ~2.5 TB fleet-wide agent memory.
